@@ -1,0 +1,29 @@
+### ============================================================
+###  S03-26 Web App — Archivo HTTP de pruebas
+###  Base URL: http://localhost:3001
+###  Usar con la extensión REST Client (VS Code)
+### ============================================================
+
+@baseUrl = http://localhost:3001
+
+# ─────────────────────────────────────────────────────────────
+# 🟢 HEALTH — Endpoints de estado del sistema
+# ─────────────────────────────────────────────────────────────
+
+### [1] Verificar que el servidor está funcionando
+GET {{baseUrl}}/health
+Accept: application/json
+
+###
+
+### [2] Verificar conexión con PostgreSQL
+GET {{baseUrl}}/health/db
+Accept: application/json
+
+###
+
+### [3] Verificar conexión con Redis
+GET {{baseUrl}}/health/redis
+Accept: application/json
+
+###
