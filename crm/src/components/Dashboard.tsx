@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { TrendingUp, Users, DollarSign, Target, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, MessageSquare, User } from 'lucide-react';
 
 const Dashboard = () => {
@@ -75,7 +76,7 @@ const Dashboard = () => {
         <div className="glass-panel section-card">
           <div className="section-header">
             <h2 className="section-title">Recent Deals</h2>
-            <button className="view-all">View All</button>
+            <Button variant="ghost" size="sm" className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">View All</Button>
           </div>
           <div className="table-container">
             <table>
