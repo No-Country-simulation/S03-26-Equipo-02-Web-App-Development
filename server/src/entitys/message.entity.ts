@@ -1,4 +1,3 @@
-// entities/message.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,7 +8,7 @@ import {
 } from 'typeorm';
 import { MessageStatus } from './enums/message-status.enum';
 import { Contact } from './contact.entity';
-import { Channel } from 'diagnostics_channel';
+import { Channel } from './channel.entity'; // ✅ FIX
 
 @Entity()
 export class Message {
@@ -25,6 +24,7 @@ export class Message {
   @Column({
     type: 'enum',
     enum: MessageStatus,
+    enumName: 'message_status_enum',
   })
   status: MessageStatus;
 
