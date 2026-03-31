@@ -1,16 +1,19 @@
-import Sidebar from './components/Sidebar';
-import Topbar from './components/Topbar';
-import Dashboard from './components/Dashboard';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import MainLayout from "@/layouts/MainLayout";
+import Chat from "@/page/Chat";
+
+
+
 
 function App() {
   return (
-    <div className="app-container">
-      <Sidebar />
-      <div className="main-content">
-        <Topbar />
-        <Dashboard />
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainLayout />}>
+          <Route path="tray" element={<Chat />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
