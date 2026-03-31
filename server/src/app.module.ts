@@ -3,6 +3,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ContactsModule } from './contacts/contacts.module';
+import { Contact } from './entitys/contact.entity';
+import { Message } from './entitys/message.entity';
+import { Tag } from './entitys/tag.entity';
+import { Task } from './entitys/task.entity';
+import { Analytics } from './entitys/analytics.entity';
+import { Channel } from './entitys/channel.entity';
+import { Template } from './entitys/template.entity';
 import { Redis } from 'ioredis';
 
 @Module({
@@ -11,6 +19,8 @@ import { Redis } from 'ioredis';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    ContactsModule,
 
     // ─── PostgreSQL ───────────────────────────────────────────────────────────
     TypeOrmModule.forRootAsync({
@@ -22,8 +32,8 @@ import { Redis } from 'ioredis';
         ssl: {
           rejectUnauthorized: false,
         },
-        entities: [],
-        synchronize: false, // NUNCA true en producción
+        entities: [Contact, Message, Tag, Task, Analytics, Channel, Template],
+        synchronize: true, // Cambiado a true temporalmente para desarrollo si es necesario, o mantener false si ya hay migraciones
         logging: false,
       }),
     }),
