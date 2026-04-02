@@ -1,0 +1,73 @@
+### ============================================================
+###  S03-26 Web App — Twilio / WhatsApp API
+###  Base URL: http://localhost:3001
+###  Usar con la extensión REST Client (VS Code)
+### ============================================================
+
+@baseUrl = http://localhost:3001
+
+# Número de prueba — reemplazá con un número real habilitado en el Sandbox de Twilio
+@testPhone = +5493755349625
+
+# SID de un Content Template de Twilio (HX...)
+# Lo encontrás en: https://console.twilio.com/us1/develop/sms/content-editor
+@contentSid = HXb5b62575e6e4ff6129ad7c8efe1f983e
+
+# ─────────────────────────────────────────────────────────────
+# 💬 WHATSAPP — Envío de mensajes via Twilio
+# ─────────────────────────────────────────────────────────────
+
+### [1] Enviar mensaje de texto libre por WhatsApp
+# Envía un mensaje simple a un número de WhatsApp.
+# El número destino debe haber unido el Sandbox (en dev) o ser cliente real (en prod).
+POST {{baseUrl}}/twilio/send
+Content-Type: application/json
+
+{
+  "to": "{{testPhone}}",
+  "body": "Hola! 👋 Te escribimos desde el CRM. ¿En qué te podemos ayudar?"
+}
+
+###
+
+### [2] Enviar mensaje con Content Template (plantilla)
+# Usa un template pre-aprobado de Twilio con variables dinámicas.
+# Ideal para recordatorios, confirmaciones y mensajes estructurados.
+# Las claves del objeto "variables" corresponden a los {{1}}, {{2}} del template.
+POST {{baseUrl}}/twilio/send-template
+Content-Type: application/json
+
+{
+  "to": "{{testPhone}}",
+  "contentSid": "{{contentSid}}",
+  "variables": {
+    "1": "12/1",
+    "2": "3pm"
+  }
+}
+
+###
+
+# ─────────────────────────────────────────────────────────────
+# 📥 WEBHOOK — Recepción de mensajes entrantes desde Twilio
+# ─────────────────────────────────────────────────────────────
+# NOTA: Twilio llama a este endpoint automáticamente cuando llega un WhatsApp.
+# Para probarlo en desarrollo necesitás exponer el servidor con ngrok:
+#
+#   npm run start:dev:ngrok
+#
+# La URL del túnel se imprime en consola. Luego configurala en:
+#   Twilio Console > Messaging > Sandbox Settings > WHEN A MESSAGE COMES IN
+#   URL: https://<tu-subdominio>.ngrok-free.app/twilio/webhook
+#   Method: HTTP POST
+#
+# En producción Twilio apunta directo al dominio del servidor (no se usa ngrok).
+
+### [3] Simular webhook de mensaje entrante (solo para pruebas locales)
+# Twilio envía los datos como application/x-www-form-urlencoded
+POST {{baseUrl}}/twilio/webhook
+Content-Type: application/x-www-form-urlencoded
+
+From=whatsapp%3A%2B5493755349625&Body=Hola%20quiero%20info&To=whatsapp%3A%2B14155238886
+
+###

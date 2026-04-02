@@ -12,6 +12,7 @@ import { Analytics } from './entitys/analytics.entity';
 import { Channel } from './entitys/channel.entity';
 import { Template } from './entitys/template.entity';
 import { Redis } from 'ioredis';
+import { TwilioModule } from './twilio/twilio.module';
 
 @Module({
   imports: [
@@ -37,6 +38,8 @@ import { Redis } from 'ioredis';
         logging: false,
       }),
     }),
+
+    TwilioModule,
   ],
   controllers: [AppController],
   providers: [
