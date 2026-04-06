@@ -1,9 +1,9 @@
-import { MoreVertical } from "lucide-react";
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { MoreVertical, ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
 type Message = {
   id: number;
+  name?: string;
   text: string;
   time: string;
   sender: "me" | "other";
@@ -12,6 +12,7 @@ type Message = {
 const messages: Message[] = [
   {
     id: 1,
+    name: "David Park",
     text: "Hola, estoy evaluando soluciones CRM para nuestra empresa. ¿Pueden compartir su documentación de seguridad y cumplimiento?",
     time: "3:15 PM",
     sender: "other",
@@ -24,6 +25,7 @@ const messages: Message[] = [
   },
   {
     id: 3,
+    name: "David Park",
     text: "¡Excelente! Además, ¿cuál es su enfoque de encriptación de datos tanto en reposo como en tránsito?",
     time: "4:45 PM",
     sender: "other",
@@ -33,23 +35,34 @@ const messages: Message[] = [
 const ChatWindow = () => {
   const [status, setStatus] = useState<"prospecto" | "cliente">("prospecto");
   const [open, setOpen] = useState(false);
+
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex-1 flex flex-col bg-white h-full">
       <div className="flex items-center justify-between px-4 py-3 border-b bg-white">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-teal-400 flex items-center justify-center text-white font-semibold">
+          <div className="w-10 h-10 rounded-full bg-[#65bcac] flex items-center justify-center text-white font-semibold">
             DP
           </div>
 
           <div className="flex flex-col relative">
-            <h2 className="text-sm font-semibold">David Park</h2>
-            <p className="text-xs text-gray-500">d.park@techfirm.com</p>
+            <h2 className="font-semibold text-base mb-0.5">David Park</h2>
 
+            <div className="text-xs text-gray-500 flex items-center gap-1.5">
+              <span>WhatsApp •</span>
+              <span>sarah.johnson@company.com</span>
+            </div>
           </div>
-          <div className="relative">
+
+          <div className="relative ml-5">
             <button
               onClick={() => setOpen(!open)}
-              className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-md border bg-gray-50 hover:bg-gray-100 transition"
+              className="flex items-center gap-1 text-xs p-2 rounded-[5px] border bg-gray-50 hover:bg-gray-100 transition"
             >
               <span className="capitalize">{status}</span>
               <ChevronDown className="w-3 h-3 text-gray-500" />
@@ -81,45 +94,57 @@ const ChatWindow = () => {
           </div>
         </div>
 
-        {/* Opciones */}
         <button>
           <MoreVertical className="w-5 h-5 text-gray-500" />
         </button>
       </div>
 
-      {/* MENSAJES */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gray-50">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${
-              msg.sender === "me" ? "justify-end" : "justify-start"
-            }`}
-          >
+      <div className="flex-1 overflow-y-auto px-6 py-6 scroll-smooth">
+        <div className="space-y-6 max-w-4xl mx-auto">
+          <div className="flex items-center justify-center">
+            <p className="px-4 py-1.5 bg-gray-100 rounded-full text-xs text-gray-500 font-medium">
+              Hoy
+            </p>
+          </div>
+          {messages.map((msg) => (
             <div
-              className={`max-w-[70%] rounded-lg px-4 py-3 text-sm shadow-sm ${
-                msg.sender === "me"
-                  ? "bg-teal-500 text-white"
-                  : "bg-white text-gray-800 border"
+              key={msg.id}
+              className={`flex ${
+                msg.sender === "me" ? "justify-end" : "justify-start"
               }`}
             >
-              <p>{msg.text}</p>
+              <div className="flex flex-col max-w-[70%]">
+                {msg.sender === "other" && msg.name && (
+                  <p className="text-xs text-gray-500 mb-1 ml-1">{msg.name}</p>
+                )}
 
-              <span
-                className={`block text-[10px] mt-2 ${
-                  msg.sender === "me"
-                    ? "text-teal-100 text-right"
-                    : "text-gray-400"
-                }`}
-              >
-                {msg.time}
-              </span>
+                <div
+                  className={`rounded-lg px-4 py-3 text-sm shadow-sm ${
+                    msg.sender === "me"
+                      ? "bg-teal-500 text-white"
+                      : "bg-white text-gray-800 border"
+                  }`}
+                >
+                  <p>{msg.text}</p>
+
+                  <span
+                    className={`block text-[10px] mt-2 ${
+                      msg.sender === "me"
+                        ? "text-teal-100 text-right"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {msg.time}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+
+          <div ref={bottomRef} />
+        </div>
       </div>
 
-      {/* INPUT */}
       <div className="border-t bg-white px-4 py-3 flex items-center gap-3">
         <input
           type="text"

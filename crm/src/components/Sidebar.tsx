@@ -2,6 +2,7 @@ import {
   MessageSquare,
   LayoutDashboard,
   Users,
+  MessageSquareText,
   SquareCheckBig,
   Settings,
 } from "lucide-react";
@@ -10,57 +11,90 @@ import {
   Avatar,
   AvatarImage,
   AvatarFallback,
-  AvatarBadge,
 } from "@/components/ui/avatar";
+
+import { NavLink } from "react-router-dom";
+
+const navMain = [
+  { icon: MessageSquareText, label: "Bandeja", to: "/tray" },
+  { icon: LayoutDashboard, label: "Dashboard", to: "/" },
+  { icon: Users, label: "Contactos", to: "/contacts" },
+  { icon: SquareCheckBig, label: "Tareas", to: "/tasks" },
+];
+
+const navConfig = [{ icon: Settings, label: "Ajustes", to: "/settings" }];
 
 const Sidebar = () => {
   return (
-    <aside className="flex flex-col h-screen w-64 border-r bg-[#f4f5f5]">
-      <div className="p-6 border-b flex items-center gap-3">
-        <div className="flex items-center justify-center w-8 h-8 bg-[#65bcac] rounded-lg">
-          <MessageSquare className="text-white" />
+    <aside className="w-60 h-screen p-6 bg-[#F8FAFC] inline-flex flex-col justify-start items-start gap-8">
+      <div className="self-stretch py-4 border-b border-gray-200 inline-flex justify-start items-center gap-2.5">
+        <div className="w-8 h-8 px-1.5 bg-linear-to-br bg-[#61B5A9] rounded-lg shadow-sm flex justify-center items-center shrink-0">
+          <MessageSquare size={16} className="text-white" />
         </div>
-        <span className="font-bold text-lg">ChatCRM</span>
+        <span className="text-neutral-950 text-base font-semibold">ChatCRM</span>
       </div>
+      <nav className="self-stretch flex-1 border-b border-gray-200 flex flex-col justify-start items-start gap-4">
+        <div className="self-stretch flex flex-col justify-start items-start gap-2">
+          <p className="text-xs font-medium text-gray-400 tracking-widest uppercase font-mono">
+            Core Dashboard
+          </p>
+          {navMain.map(({ icon: Icon, label, to }) => (
+            <NavLink
+              key={label}
+              to={to}
+              end={to === "/"}
+              className={({ isActive }) =>
+                `self-stretch h-10 px-4 py-2 rounded-lg inline-flex justify-start items-center gap-2 transition-colors ${
+                  isActive
+                    ? "bg-[#0D9488] text-white"
+                    : "bg-[#F8FAFC] text-gray-700 hover:bg-[#65bdad]/10 hover:text-[#65bdad]"
+                }`
+              }
+            >
+              <Icon size={20} />
+              <span className="flex-1 text-sm font-semibold">{label}</span>
+            </NavLink>
+          ))}
+        </div>
+        <div className="self-stretch flex flex-col justify-start items-start gap-2">
+          <p className="text-xs font-medium text-gray-400 tracking-widest uppercase font-mono">
+            Configuración
+          </p>
+          {navConfig.map(({ icon: Icon, label, to }) => (
+            <NavLink
+              key={label}
+              to={to}
+              className={({ isActive }) =>
+                `self-stretch h-10 px-4 py-2 rounded-lg inline-flex justify-start items-center gap-2 transition-colors ${
+                  isActive
+                    ? "bg-[#0D9488] text-white"
+                    : "bg-[#F8FAFC] text-gray-700 hover:bg-[#65bdad]/10 hover:text-[#65bdad]"
+                }`
+              }
+            >
+              <Icon size={20} />
+              <span className="flex-1 text-sm font-semibold">{label}</span>
+            </NavLink>
+          ))}
+        </div>
 
-      <nav className="flex-1 flex flex-col gap-1 px-3 py-6">
-        <a className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-[#65bdad] text-white ">
-          <LayoutDashboard size={18} />
-          <span className="text-sm font-medium">Dashboard</span>
-        </a>
-
-        <a className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-[#65bdad] transition-colors hover:text-white">
-          <MessageSquare size={18} />
-          <span className="text-sm">Bandeja</span>
-        </a>
-
-        <a className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-[#65bdad] transition-colors hover:text-white">
-          <Users size={18} />
-          <span className="text-sm">Contactos</span>
-        </a>
-
-        <a className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-[#65bdad] transition-colors hover:text-white">
-          <SquareCheckBig size={18} />
-          <span className="text-sm">Tareas</span>
-        </a>
-
-        <a className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-[#65bdad] transition-colors hover:text-white">
-          <Settings size={18} />
-          <span className="text-sm">Ajustes</span>
-        </a>
       </nav>
 
-      <div className="p-6 border-t flex items-center gap-3">
-        <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-          <AvatarFallback>CN</AvatarFallback>
-          <AvatarBadge className="bg-green-600 dark:bg-green-800" />
-        </Avatar>
-        <div className="leading-tight">
-          <p className="text-sm font-medium">Juan Pérez</p>
-          <p className="text-xs text-gray-500">juan@empresa.com</p>
+      {/* Usuario */}
+      <div className="px-3 py-2 bg-[#F8FAFC] rounded-lg inline-flex justify-start items-center gap-2 cursor-pointer hover:bg-gray-100 transition-colors w-full">
+        <div className="relative w-8 h-8 shrink-0">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+            <AvatarFallback className="text-xs">JP</AvatarFallback>
+          </Avatar>
+          <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-white" />
+        </div>
+        <div className="flex flex-col justify-start items-start flex-1 min-w-0">
+          <p className="text-xs font-semibold text-gray-900 truncate">Juan Pérez</p>
+          <p className="text-xs font-semibold text-gray-500 truncate">juan@empresa.com</p>
         </div>
       </div>
+
     </aside>
   );
 };

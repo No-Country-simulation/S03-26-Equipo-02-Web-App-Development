@@ -3,7 +3,6 @@ import { SearchIcon } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ConversationPreview } from "@/types/chatTray";
 
-
 const MOCK_CONVERSATIONS: ConversationPreview[] = [
   {
     id: "1",
@@ -35,7 +34,7 @@ const MOCK_CONVERSATIONS: ConversationPreview[] = [
     channel: "email",
     tags: ["empresa", "prospecto-cálido"],
   },
-    {
+  {
     id: "4",
     contactName: "David Park",
     contactEmail: "d.park@techfirm.com",
@@ -45,7 +44,7 @@ const MOCK_CONVERSATIONS: ConversationPreview[] = [
     channel: "email",
     tags: ["empresa", "prospecto-cálido"],
   },
-    {
+  {
     id: "5",
     contactName: "alexis Park",
     contactEmail: "d.park@techfirm.com",
@@ -58,10 +57,10 @@ const MOCK_CONVERSATIONS: ConversationPreview[] = [
 ];
 
 const MessageTray = () => {
-    const [selectedId, setSelectedId] = useState<string>("3");
+  const [selectedId, setSelectedId] = useState<string>("3");
   return (
     <div>
-            <div className="w-96 h-full bg-gray-50 border-r">
+      <div className="w-96 h-full bg-white border-r">
         <header className="px-5 py-4 border-b border-border space-y-4">
           <h1 className="text-lg font-semibold">Bandeja de Entrada</h1>
           <div>
@@ -131,9 +130,7 @@ const MessageTray = () => {
 
               <div className="flex items-center justify-between">
                 <div className="flex gap-1.5 items-center flex-wrap">
-                  <div
-                    className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded border border-gray-200 capitalize"
-                  >
+                  <div className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded border border-gray-200 capitalize">
                     {chat.channel === "wa" ? (
                       <span>WA</span>
                     ) : (
@@ -162,7 +159,7 @@ const MessageTray = () => {
         </section>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default MessageTray
+export default MessageTray;
