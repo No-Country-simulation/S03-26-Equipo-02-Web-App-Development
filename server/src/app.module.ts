@@ -14,6 +14,7 @@ import { Template } from './entitys/template.entity';
 import { Redis } from 'ioredis';
 import { TwilioModule } from './twilio/twilio.module';
 import { BullModule } from '@nestjs/bullmq';
+import { BrevoModule } from './brevo/brevo.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { BullModule } from '@nestjs/bullmq';
     }),
 
     TwilioModule,
+    BrevoModule,
 
     BullModule.forRootAsync({
       imports: [ConfigModule],
