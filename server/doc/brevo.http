@@ -1,0 +1,68 @@
+### ============================================================
+###  S03-26 Web App — Brevo (Email) API
+###  Base URL: http://localhost:3001
+###  Usar con la extensión REST Client (VS Code)
+### ============================================================
+
+@baseUrl = http://localhost:3001
+
+# Email de prueba — reemplazá con un correo real para testear el tracking
+@testEmail = orlando@ejemplo.com
+
+# ─────────────────────────────────────────────────────────────
+#  CAMPAÑAS — Envío de correos masivos
+# ─────────────────────────────────────────────────────────────
+
+### [1] Crear y enviar una campaña de email
+# Este endpoint usa el EmailCampaignsApi de Brevo.
+# listIds: IDs de las listas en tu panel de Brevo.
+POST {{baseUrl}}/brevo/campaigns
+Content-Type: application/json
+
+{
+  "name": "Campaña de Verano 2026",
+  "subject": "¡Novedades en nuestro servicio! 🚀",
+  "htmlContent": "<h1>Hola!</h1><p>Estamos emocionados de compartir las nuevas actualizaciones.</p>",
+  "listIds": [2]
+}
+
+###
+
+# ─────────────────────────────────────────────────────────────
+# 📥 WEBHOOKS — Rastreo de aperturas y recepción de emails
+# ─────────────────────────────────────────────────────────────
+# Brevo llama a este endpoint cuando ocurren eventos de tracking o inbound.
+# Configura esta URL en: https://app.brevo.com/settings/webhook
+# URL sugerida: http://<tu-dominio>/brevo/webhooks
+
+### [2] Simular evento de APERTURA (Open Tracking)
+# Indica que un contacto ha leído el correo ("quien lee").
+# El sistema buscará el último mensaje enviado a ese email y lo marcará como READ.
+POST {{baseUrl}}/brevo/webhooks
+Content-Type: application/json
+
+{
+  "event": "opened",
+  "email": "{{testEmail}}",
+  "date": "2026-04-06 12:00:01"
+}
+
+###
+
+### [3] Simular EMAIL ENTRANTE (Inbound Email)
+# Indica que un contacto nos ha escrito un correo ("quien escribe").
+# El sistema creará el contacto si no existe y guardará el mensaje como received.
+POST {{baseUrl}}/brevo/webhooks
+Content-Type: application/json
+
+{
+  "event": "inbound",
+  "from": {
+    "name": "Cliente Interesado",
+    "email": "{{testEmail}}"
+  },
+  "subject": "Consulta sobre el CRM",
+  "text": "Hola, me gustaría saber más sobre la integración de WhatsApp."
+}
+
+###
