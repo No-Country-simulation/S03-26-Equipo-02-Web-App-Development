@@ -7,8 +7,8 @@
 @baseUrl = http://localhost:3001
 
 # Número de prueba — reemplazá con un número real habilitado en el Sandbox de Twilio
-# @testPhone = +5493755349625
-@testPhone = +5493755378465
+@testPhone = +5493755349625
+#@testPhone = +5493755378465
 
 # SID de un Content Template de Twilio (HX...)
 # Lo encontrás en: https://console.twilio.com/us1/develop/sms/content-editor
