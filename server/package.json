@@ -23,7 +23,7 @@
   "dependencies": {
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.1.17",
-    "@nestjs/config": "^1.1.5",
+    "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.1.17",
     "@nestjs/mapped-types": "^2.1.1",
     "@nestjs/platform-express": "^11.1.17",
