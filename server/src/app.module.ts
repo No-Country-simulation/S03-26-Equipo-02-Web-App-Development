@@ -12,6 +12,7 @@ import { Analytics } from './entitys/analytics.entity';
 import { Channel } from './entitys/channel.entity';
 import { Template } from './entitys/template.entity';
 import { Redis } from 'ioredis';
+import { TasksModule } from './tasks/tasks.module';
 import { TwilioModule } from './twilio/twilio.module';
 import { BullModule } from '@nestjs/bullmq';
 import { BrevoModule } from './brevo/brevo.module';
@@ -40,6 +41,7 @@ import { BrevoModule } from './brevo/brevo.module';
         logging: false,
       }),
     }),
+    TasksModule,
 
     TwilioModule,
     BrevoModule,
