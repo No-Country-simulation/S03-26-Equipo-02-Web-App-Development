@@ -5,8 +5,14 @@ import { HttpExceptionFilter } from './common/http-exception/http-exception.filt
 import { Logger, LogLevel, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import * as express from 'express';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Soporte para application/x-www-form-urlencoded (Twilio)
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 
   const config = app.get(ConfigService);
   const port = Number(config.get<string>('PORT')) || 3000;

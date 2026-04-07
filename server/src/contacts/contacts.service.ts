@@ -5,12 +5,28 @@ import { Contact } from '../entitys/contact.entity';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 
+import { SegmentType } from '../entitys/enums/segment-type.enum';
+
 @Injectable()
 export class ContactsService {
   constructor(
     @InjectRepository(Contact)
     private readonly contactRepository: Repository<Contact>,
   ) {}
+
+  async findOrCreateByPhone(phone: string, firstName?: string): Promise<Contact> {
+    let contact = await this.contactRepository.findOne({ where: { phone } });
+    if (!contact) {
+      contact = this.contactRepository.create({
+        phone,
+        firstName: firstName || phone,
+        lastName: '',
+        segmentType: SegmentType.LEAD,
+      });
+      contact = await this.contactRepository.save(contact);
+    }
+    return contact;
+  }
 
   async create(createContactDto: CreateContactDto): Promise<Contact> {
     const contact = this.contactRepository.create(createContactDto);

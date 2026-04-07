@@ -4,10 +4,11 @@
 ###  Usar con la extensión REST Client (VS Code)
 ### ============================================================
 
-@baseUrl = http://localhost:3001
+#@baseUrl = http://localhost:3001
+@baseUrl = https://s03-26-equipo-02-web-app-development.onrender.com
 
 # Email de prueba — reemplazá con un correo real para testear el tracking
-@testEmail = orlando@ejemplo.com
+@testEmail = orlandocv0107@gmail.com.com
 
 # ─────────────────────────────────────────────────────────────
 #  CAMPAÑAS — Envío de correos masivos

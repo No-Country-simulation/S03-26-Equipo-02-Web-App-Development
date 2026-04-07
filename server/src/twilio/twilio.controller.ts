@@ -18,9 +18,16 @@ import { Message } from '../entitys/message.entity';
 import { Channel } from '../entitys/channel.entity';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { ContactsService } from '../contacts/contacts.service';
+import { MessageStatus } from '../entitys/enums/message-status.enum';
+import { ChannelType } from '../entitys/enums/channel-type.enum';
+import type { Response } from 'express';
+import { Res } from '@nestjs/common';
 
 interface TwilioWebhookBody {
+  MessageSid?: string;
   From?: string;
+  To?: string;
   Body?: string;
   ProfileName?: string;
 }
@@ -31,6 +38,7 @@ export class TwilioController {
 
   constructor(
     private readonly twilioService: TwilioService,
+    private readonly contactsService: ContactsService,
     @InjectRepository(Contact)
     private readonly contactRepo: Repository<Contact>,
     @InjectRepository(Message)
@@ -44,27 +52,38 @@ export class TwilioController {
   /**
    * POST /twilio/webhook
    * Recibe mensajes entrantes de WhatsApp desde Twilio.
-   * Agrega el mensaje a la cola para procesamiento asíncrono.
+   * Agrega el mensaje a la cola para procesamiento asíncrono y responde TwiML.
    */
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
-  async handleIncoming(@Body() body: TwilioWebhookBody) {
+  async handleIncoming(@Body() body: TwilioWebhookBody, @Res() res: Response) {
     const rawFrom = body.From ?? '';
+    const rawTo = body.To ?? '';
     const content = body.Body ?? '';
     const profileName = body.ProfileName ?? '';
+    const messageSid = body.MessageSid ?? '';
     const phone = rawFrom.replace('whatsapp:', '').trim();
 
-    this.logger.log(`Mensaje recibido de ${phone}, encolando...`);
+    // Requisito: Imprimir en consola los datos recibidos
+    this.logger.log(`[Webhook] Mensaje de: ${rawFrom} | Para: ${rawTo} | SID: ${messageSid} | Bloque: ${content}`);
 
     if (phone && content) {
       await this.whatsappQueue.add('incoming-message', {
         phone,
         content,
         profileName,
+        messageSid,
       });
     }
 
-    return '';
+    // Requisito: Responder con XML TwiML válido
+    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>Mensaje recibido correctamente</Message>
+</Response>`;
+
+    res.set('Content-Type', 'text/xml');
+    return res.send(twiml);
   }
 
   /**
@@ -94,13 +113,16 @@ export class TwilioController {
 
   /**
    * POST /twilio/send
-   * Envía un mensaje de WhatsApp a un contacto.
-   * Body: { to: "+5493755349625", body: "Hola!" }
+   * Envía un mensaje de WhatsApp a un contacto y lo persiste en la BD.
    */
   @Post('send')
   async sendMessage(@Body() dto: { to: string; body: string }) {
     try {
       const result = await this.twilioService.sendMessage(dto.to, dto.body);
+
+      // Persistir el mensaje saliente
+      await this.persistOutboundMessage(dto.to, dto.body, result.sid);
+
       return { sid: result.sid, status: result.status };
     } catch (err: any) {
       const twilioMessage = err?.message ?? 'Error desconocido de Twilio';
@@ -120,8 +142,7 @@ export class TwilioController {
 
   /**
    * POST /twilio/send-template
-   * Envía un mensaje usando un Content Template de Twilio.
-   * Body: { to: "+5493755349625", contentSid: "HX...", variables: { "1": "valor" } }
+   * Envía un mensaje usando un Content Template de Twilio y lo persiste.
    */
   @Post('send-template')
   async sendTemplate(
@@ -133,6 +154,11 @@ export class TwilioController {
         dto.contentSid,
         dto.variables,
       );
+
+      // Para templates, guardamos las variables o una descripción (simplificado: Body aproximado o contentSid)
+      const content = `[Template: ${dto.contentSid}] Variables: ${JSON.stringify(dto.variables)}`;
+      await this.persistOutboundMessage(dto.to, content, result.sid);
+
       return { sid: result.sid, status: result.status };
     } catch (err: any) {
       const twilioMessage = err?.message ?? 'Error desconocido de Twilio';
@@ -151,8 +177,37 @@ export class TwilioController {
   }
 
   /**
+   * Helper para guardar mensajes salientes en la base de datos.
+   */
+  private async persistOutboundMessage(to: string, content: string, sid: string) {
+    const phone = to.replace('whatsapp:', '').trim();
+
+    // 1. Buscar/Crear Contacto
+    const contact = await this.contactsService.findOrCreateByPhone(phone);
+
+    // 2. Obtener/Crear Canal
+    let channel = await this.channelRepo.findOne({ where: { type: ChannelType.WHATSAPP } });
+    if (!channel) {
+      channel = await this.channelRepo.save(this.channelRepo.create({ type: ChannelType.WHATSAPP }));
+    }
+
+    // 3. Crear Mensaje
+    const message = this.messageRepo.create({
+      contact,
+      channel,
+      content,
+      direction: 'sent',
+      status: MessageStatus.QUEUED,
+      twilioSid: sid,
+      isRead: true, // Lo que enviamos nosotros ya está "visto"
+    });
+
+    await this.messageRepo.save(message);
+    this.logger.log(`Mensaje saliente persistido: ${sid} para ${phone}`);
+  }
+
+  /**
    * Devuelve una sugerencia legible según el código de error de Twilio.
-   * Referencia: https://www.twilio.com/docs/api/errors
    */
   private getTwilioHint(code: number | null): string {
     const hints: Record<number, string> = {

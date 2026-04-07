@@ -10,13 +10,14 @@ import { ChannelType } from '../entitys/enums/channel-type.enum';
 import { SegmentType } from '../entitys/enums/segment-type.enum';
 import { Logger } from '@nestjs/common';
 
+import { ContactsService } from '../contacts/contacts.service';
+
 @Processor('whatsapp-messages')
 export class WhatsAppQueueProcessor extends WorkerHost {
   private readonly logger = new Logger(WhatsAppQueueProcessor.name);
 
   constructor(
-    @InjectRepository(Contact)
-    private readonly contactRepo: Repository<Contact>,
+    private readonly contactsService: ContactsService,
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
     @InjectRepository(Channel)
@@ -26,30 +27,19 @@ export class WhatsAppQueueProcessor extends WorkerHost {
   }
 
   async process(job: Job<any, any, string>): Promise<any> {
-    const { phone, content, profileName } = job.data;
+    const { phone, content, profileName, messageSid } = job.data;
 
-    this.logger.log(`Procesando mensaje de ${phone}: ${content}`);
+    this.logger.log(`Procesando mensaje de ${phone}: ${content} (SID: ${messageSid})`);
 
-    // 1. Buscar o crear el Contact por teléfono
-    let contact = await this.contactRepo.findOne({ where: { phone } });
-    if (!contact) {
-      contact = this.contactRepo.create({
-        firstName: profileName || phone,
-        lastName: '',
-        phone,
-        segmentType: SegmentType.LEAD,
-      });
-      contact = await this.contactRepo.save(contact);
-      this.logger.log(`Nuevo contacto creado desde cola: ${contact.id}`);
-    }
+    // 1. Buscar o crear el Contact por teléfono usando el servicio centralizado
+    const contact = await this.contactsService.findOrCreateByPhone(phone, profileName);
 
     // 2. Obtener o crear el canal WhatsApp
     let channel = await this.channelRepo.findOne({
       where: { type: ChannelType.WHATSAPP },
     });
     if (!channel) {
-      channel = this.channelRepo.create({ type: ChannelType.WHATSAPP });
-      channel = await this.channelRepo.save(channel);
+      channel = await this.channelRepo.save(this.channelRepo.create({ type: ChannelType.WHATSAPP }));
     }
 
     // 3. Guardar el mensaje recibido
@@ -59,11 +49,12 @@ export class WhatsAppQueueProcessor extends WorkerHost {
       content,
       direction: 'received',
       status: MessageStatus.RECEIVED,
+      twilioSid: messageSid,
       isRead: false,
     });
     await this.messageRepo.save(message);
 
-    this.logger.log(`Mensaje guardado desde cola: ${message.id}`);
+    this.logger.log(`Mensaje entrante guardado: ${message.id} (SID: ${messageSid})`);
     return { success: true, messageId: message.id };
   }
 }

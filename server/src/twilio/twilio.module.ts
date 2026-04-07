@@ -7,12 +7,14 @@ import { Contact } from '../entitys/contact.entity';
 import { Message } from '../entitys/message.entity';
 import { Channel } from '../entitys/channel.entity';
 import { WhatsAppQueueModule } from './whatsapp-queue.module';
+import { ContactsModule } from '../contacts/contacts.module';
 
 @Module({
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([Contact, Message, Channel]),
     WhatsAppQueueModule,
+    ContactsModule,
   ],
   providers: [TwilioService],
   controllers: [TwilioController],

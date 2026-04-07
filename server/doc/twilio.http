@@ -4,10 +4,11 @@
 ###  Usar con la extensión REST Client (VS Code)
 ### ============================================================
 
-@baseUrl = http://localhost:3001
+#@baseUrl = http://localhost:3001
+@baseUrl = https://s03-26-equipo-02-web-app-development.onrender.com
 
 # Número de prueba — reemplazá con un número real habilitado en el Sandbox de Twilio
-@testPhone = +5493755349625
+@testPhone = +584121780830
 #@testPhone = +5493755378465
 
 # SID de un Content Template de Twilio (HX...)
@@ -27,7 +28,7 @@ Content-Type: application/json
 
 {
   "to": "{{testPhone}}",
-  "body": "Hola! 👋 Te escribimos desde el CRM. ¿En qué te podemos ayudar?"
+  "body": "Hola! 👋 Te escribimos desde el CRM. ¿En qué te podemos ayudarrr?"
 }
 
 ###
@@ -67,28 +68,30 @@ Content-Type: application/json
 #
 # En producción Twilio apunta al dominio real del servidor (sin ngrok).
 
-### [3] Simular webhook de mensaje entrante (pruebas locales)
-# Twilio envía los datos como application/x-www-form-urlencoded
+### [3] Simular webhook de mensaje entrante (Twilio Payload)
+# Twilio envía los datos como x-www-form-urlencoded.
+# Ahora incluye MessageSid para coincidir con la nueva lógica de persistencia.
 POST {{baseUrl}}/twilio/webhook
 Content-Type: application/x-www-form-urlencoded
 
-From=whatsapp%3A%2B5493755349625&Body=Hola%20quiero%20info&To=whatsapp%3A%2B14155238886&ProfileName=Juan
+MessageSid=SM{{$guid}}&From=whatsapp%3A%2B5493755349625&Body=Hola%20quiero%20info%20desde%20Render&To=whatsapp%3A%2B14155238886&ProfileName=Juan
 
 ###
 
 # ─────────────────────────────────────────────────────────────
-# 📋 CONSULTAS — Historial de mensajes
+# 📋 LECTURA DE MENSAJES — Consulta de historial en BD
 # ─────────────────────────────────────────────────────────────
 
-### [4] Listar todos los mensajes (enviados y recibidos)
+### [4] Listar TODOS los mensajes (Historial completo de WhatsApp)
+# Aquí verás tanto los que recibes (direction: received) como los que envías (direction: sent)
 GET {{baseUrl}}/twilio/messages
 Accept: application/json
 
 ###
 
-### [5] Listar mensajes de un contacto específico por teléfono
-# Reemplazá el número en la URL (sin el +)
-GET {{baseUrl}}/twilio/messages/contact/+5493755349625
+### [5] Listar mensajes de un contacto puntual
+# Reemplazá el número en la URL (ej: +549...)
+GET {{baseUrl}}/twilio/messages/contact/+5493755378465
 Accept: application/json
 
 ###
