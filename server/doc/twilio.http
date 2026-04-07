@@ -1,0 +1,94 @@
+### ============================================================
+###  S03-26 Web App — Twilio / WhatsApp API
+###  Base URL: http://localhost:3001
+###  Usar con la extensión REST Client (VS Code)
+### ============================================================
+
+@baseUrl = http://localhost:3001
+
+# Número de prueba — reemplazá con un número real habilitado en el Sandbox de Twilio
+@testPhone = +5493755349625
+#@testPhone = +5493755378465
+
+# SID de un Content Template de Twilio (HX...)
+# Lo encontrás en: https://console.twilio.com/us1/develop/sms/content-editor
+@contentSid = HXb5b62575e6e4ff6129ad7c8efe1f983e
+
+# ─────────────────────────────────────────────────────────────
+#  ENVÍO — Mensajes salientes hacia el cliente
+# ─────────────────────────────────────────────────────────────
+
+### [1] Enviar mensaje de texto libre por WhatsApp
+# El CRM escribe a un contacto desde el número del Sandbox (+14155238886 en dev,
+# o tu número oficial aprobado en producción).
+# El contacto debe haber unido el Sandbox en dev (mensaje: "join <keyword>").
+POST {{baseUrl}}/twilio/send
+Content-Type: application/json
+
+{
+  "to": "{{testPhone}}",
+  "body": "Hola! 👋 Te escribimos desde el CRM. ¿En qué te podemos ayudar?"
+}
+
+###
+
+### [2] Enviar mensaje con Content Template (plantilla)
+# Usa un template pre-aprobado de Twilio con variables dinámicas.
+# Ideal para recordatorios, confirmaciones y mensajes automáticos.
+# Las claves del objeto "variables" corresponden a {{1}}, {{2}} del template.
+POST {{baseUrl}}/twilio/send-template
+Content-Type: application/json
+
+{
+  "to": "{{testPhone}}",
+  "contentSid": "{{contentSid}}",
+  "variables": {
+    "1": "12/1",
+    "2": "3pm"
+  }
+}
+
+###
+
+# ─────────────────────────────────────────────────────────────
+# 📥 WEBHOOK — Recepción de mensajes entrantes desde Twilio
+# ─────────────────────────────────────────────────────────────
+# Twilio llama a este endpoint cuando el contacto nos escribe por WhatsApp.
+# El mensaje se encola (BullMQ) y se procesa de forma asíncrona:
+#   - Crea el contacto si no existe (segmentType: LEAD)
+#   - Crea el canal WhatsApp si no existe
+#   - Guarda el mensaje con direction: "received"
+#
+# Para probarlo en desarrollo:
+#   1. npm run start:dev:ngrok
+#   2. Copiar la URL del túnel que aparece en consola
+#   3. Twilio Console > Messaging > Sandbox Settings > WHEN A MESSAGE COMES IN
+#      URL: https://<tu-subdominio>.ngrok-free.app/twilio/webhook   Method: POST
+#
+# En producción Twilio apunta al dominio real del servidor (sin ngrok).
+
+### [3] Simular webhook de mensaje entrante (pruebas locales)
+# Twilio envía los datos como application/x-www-form-urlencoded
+POST {{baseUrl}}/twilio/webhook
+Content-Type: application/x-www-form-urlencoded
+
+From=whatsapp%3A%2B5493755349625&Body=Hola%20quiero%20info&To=whatsapp%3A%2B14155238886&ProfileName=Juan
+
+###
+
+# ─────────────────────────────────────────────────────────────
+# 📋 CONSULTAS — Historial de mensajes
+# ─────────────────────────────────────────────────────────────
+
+### [4] Listar todos los mensajes (enviados y recibidos)
+GET {{baseUrl}}/twilio/messages
+Accept: application/json
+
+###
+
+### [5] Listar mensajes de un contacto específico por teléfono
+# Reemplazá el número en la URL (sin el +)
+GET {{baseUrl}}/twilio/messages/contact/+5493755349625
+Accept: application/json
+
+###

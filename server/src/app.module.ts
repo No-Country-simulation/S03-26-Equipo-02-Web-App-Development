@@ -13,6 +13,9 @@ import { Channel } from './entitys/channel.entity';
 import { Template } from './entitys/template.entity';
 import { Redis } from 'ioredis';
 import { TasksModule } from './tasks/tasks.module';
+import { TwilioModule } from './twilio/twilio.module';
+import { BullModule } from '@nestjs/bullmq';
+import { BrevoModule } from './brevo/brevo.module';
 
 @Module({
   imports: [
@@ -39,6 +42,23 @@ import { TasksModule } from './tasks/tasks.module';
       }),
     }),
     TasksModule,
+
+    TwilioModule,
+    BrevoModule,
+
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('REDIS_HOST'),
+          port: config.get<number>('REDIS_PORT'),
+          password: config.get<string>('REDIS_PASSWORD'),
+          username: config.get<string>('REDIS_USERNAME', 'default'),
+          tls: config.get<string>('REDIS_TLS') === 'true' ? {} : undefined,
+        },
+      }),
+    }),
   ],
   controllers: [AppController],
   providers: [
