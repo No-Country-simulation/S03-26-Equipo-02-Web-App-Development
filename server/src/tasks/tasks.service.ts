@@ -52,13 +52,16 @@ export class TasksService {
   async update(id: string, updateTaskDto: UpdateTaskDto): Promise<Task> {
     const task = await this.findOne(id);
 
-    if (updateTaskDto.contactId) {
+    // Ajustamos para que reconozca contactId de forma segura
+    const { contactId } = updateTaskDto as any;
+
+    if (contactId) {
       const contact = await this.contactRepository.findOne({
-        where: { id: updateTaskDto.contactId },
+        where: { id: contactId },
       });
       if (!contact) {
         throw new NotFoundException(
-          `Contact with ID ${updateTaskDto.contactId} not found`,
+          `Contact with ID ${contactId} not found`,
         );
       }
       task.contact = contact;

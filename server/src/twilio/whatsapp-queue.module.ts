@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Contact } from '../entitys/contact.entity';
 import { Message } from '../entitys/message.entity';
 import { Channel } from '../entitys/channel.entity';
+import { ContactsModule } from '../contacts/contacts.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { Channel } from '../entitys/channel.entity';
       name: 'whatsapp-messages',
     }),
     TypeOrmModule.forFeature([Contact, Message, Channel]),
+    ContactsModule,
   ],
   providers: [WhatsAppQueueProcessor],
   exports: [BullModule],
