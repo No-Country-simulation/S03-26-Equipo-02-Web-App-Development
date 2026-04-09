@@ -37,6 +37,9 @@ export class Message {
   @Column()
   direction: 'sent' | 'received';
 
+  @Column({ nullable: true })
+  twilioSid: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
