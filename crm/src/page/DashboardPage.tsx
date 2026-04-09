@@ -10,8 +10,6 @@ import {
   TrendingDown,
   TrendingUp,
   Users,
-  FileText,
-  Table as TableIcon,
   Check,
   X,
 } from "lucide-react";

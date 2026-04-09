@@ -13,10 +13,7 @@ import {
   HelpCircle,
   Check,
   X,
-  FileText,
-  Table as TableIcon,
   Eye,
-  MessageSquareText,
   Pencil,
   Trash2,
 } from "lucide-react";
@@ -34,7 +31,6 @@ export default function ContactsPage() {
   const navigate = useNavigate();
   const { contacts, setContacts } = useContacts();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("Todos");
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<"CSV" | "PDF">("CSV");
   const [selectedContacts, setSelectedContacts] = useState<number[]>([]);

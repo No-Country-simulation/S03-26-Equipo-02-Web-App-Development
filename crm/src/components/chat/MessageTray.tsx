@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { SearchIcon } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { ConversationPreview } from "@/types/chatTray";
 import { useContacts } from "@/context/useContacts";
 
-const MOCK_CHAT_DATA = [
+const MOCK_CHAT_METADATA = [
   {
     contactEmail: "sarah@empresa.com",
     lastMessage: "¡Gracias por la rápida respuesta! La demo fue excelente.",
@@ -26,148 +24,125 @@ const MOCK_CHAT_DATA = [
     unreadCount: 0,
     channel: "email",
   },
-  {
-    contactEmail: "generic",
-    lastMessage: "Hola, me gustaría recibir más información sobre el plan enterprise.",
-    timestamp: "11:45 AM",
-    unreadCount: 0,
-    channel: "wa",
-  },
-  {
-    contactEmail: "generic2",
-    lastMessage: "Quedo a la espera de su confirmación para la reunión de mañana.",
-    timestamp: "Hace 2 días",
-    unreadCount: 0,
-    channel: "email",
-  }
 ];
 
-const MessageTray = ({ selectedId: controlledId, onSelect }: { selectedId?: string, onSelect?: (id: string) => void }) => {
-  const [internalSelectedId, setInternalSelectedId] = useState<string>("1");
+interface MessageTrayProps {
+  selectedId?: string;
+  onSelect?: (id: string) => void;
+}
+
+const MessageTray = ({ selectedId: controlledId, onSelect }: MessageTrayProps) => {
+  const [internalSelectedId, setInternalSelectedId] = useState<string>("2");
+  const [activeTab, setActiveTab] = useState("Todas");
   const { contacts } = useContacts();
 
   const selectedId = controlledId || internalSelectedId;
+  const tabs = ["Todas", "No leídos", "Prospectos", "Clientes"];
+
   const handleSelect = (id: string) => {
     if (onSelect) onSelect(id);
     setInternalSelectedId(id);
   };
 
-  // Combine live contacts with mock chat metadata
   const conversations = contacts.map((contact, index) => {
-    const mockData = MOCK_CHAT_DATA.find(m => 
+    const mock = MOCK_CHAT_METADATA.find(m => 
       m.contactEmail.toLowerCase() === contact.email.toLowerCase() ||
-      contact.name.toLowerCase().includes("sarah") && m.contactEmail.includes("sarah")
-    ) || MOCK_CHAT_DATA[index % MOCK_CHAT_DATA.length];
+      (contact.name.toLowerCase().includes("sarah") && m.contactEmail.includes("sarah"))
+    ) || MOCK_CHAT_METADATA[index % MOCK_CHAT_METADATA.length];
 
     return {
       id: contact.id.toString(),
       contactName: contact.name,
       contactEmail: contact.email,
-      lastMessage: mockData.lastMessage,
-      timestamp: mockData.timestamp,
-      unreadCount: mockData.unreadCount,
-      channel: mockData.channel,
+      lastMessage: mock.lastMessage,
+      timestamp: mock.timestamp,
+      unreadCount: mock.unreadCount,
+      channel: mock.channel,
       tags: contact.tags || [],
-      status: contact.status
     };
   });
 
   return (
-    <div>
-      <div className="w-96 h-full bg-white border-r">
-        <header className="px-5 py-4 border-b border-border space-y-4">
-          <h1 className="text-lg font-semibold">Bandeja de Entrada</h1>
-          <div>
-            <Tabs defaultValue="conversaciones" className="w-full">
-              <TabsList className="w-full justify-start border-b">
-                <TabsTrigger
-                  value="conversaciones"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary"
-                >
-                  Todos
-                </TabsTrigger>
-                <TabsTrigger
-                  value="tareas"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary"
-                >
-                  No leídos
-                </TabsTrigger>
-                <TabsTrigger
-                  value="prospectos"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary"
-                >
-                  Prospectos
-                </TabsTrigger>
-                <TabsTrigger
-                  value="clientes"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary"
-                >
-                  Clientes
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
+    <div className="w-[380px] h-screen bg-white border-r flex flex-col overflow-hidden">
+      <header className="p-6 space-y-6">
+        <h1 className="text-[#020617] text-3xl font-bold tracking-tight">
+          Bandeja de Entrada
+        </h1>
 
-          <div className="overflow-hidden flex items-center gap-2 rounded-md border bg-white px-3 py-1">
-            <SearchIcon size={18} className="text-gray-500" />
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className=" bg-transparent border-none focus:outline-none w-full hover"
-            />
-          </div>
-        </header>
+        <div className="flex items-center gap-2 bg-[#F8FAFC] p-1.5 rounded-xl border border-[#F1F5F9]">
+          {tabs.map((tab) => {
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 py-2 rounded-lg text-[13px] font-bold transition-all duration-200 whitespace-nowrap
+        ${
+          activeTab === tab
+            ? "bg-[#0D9488] text-white shadow-md shadow-[#0D9488]/20"
+            : "text-[#475569] hover:bg-white hover:shadow-sm"
+        }`}
+              >
+                {tab}
+              </button>
+            );
+          })}
+        </div>
 
-        <section className="p-2 overflow-y-auto custom-scrollbar h-[calc(100vh-180px)]">
-          {conversations.map((chat) => (
-            <div
-              key={chat.id}
-              onClick={() => handleSelect(chat.id)}
-              className={`p-3.5 border-b w-full rounded-xl text-left transition-all duration-200 mb-1 group relative hover:bg-muted/60 border border-transparent hover:border-border/50 hover:shadow-sm ${
-                selectedId === chat.id
-                  ? "bg-[#65bcac]/20 border-[#65bcac] shadow-sm"
-                  : ""
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-bold text-[15px] truncate pr-2 transition-colors text-slate-900 group-hover:text-black">
-                  {chat.contactName}
-                </h3>
-                <span className="text-[11px] font-semibold text-slate-400">
-                  {chat.timestamp}
-                </span>
-              </div>
+        <div className="relative w-full">
+          <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+          <input
+            type="text"
+            placeholder="Buscar conversaciones..."
+            className="w-full h-11 pl-11 pr-4 rounded-xl border border-[#E2E8F0] text-sm text-[#475569] bg-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#0D9488]/20 focus:border-[#0D9488] transition-all placeholder:text-[#94A3B8]"
+          />
+        </div>
+      </header>
 
-              <p className="text-[13px] font-medium mb-3 line-clamp-2 leading-relaxed text-slate-500 group-hover:text-slate-700">
-                {chat.lastMessage}
-              </p>
-
-              <div className="flex items-center justify-between">
-                <div className="flex gap-1.5 items-center flex-wrap">
-                  <div className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded border border-slate-200 font-bold uppercase">
-                    {chat.channel === "wa" ? "WA" : "Mail"}
-                  </div>
-
-                  {chat.unreadCount > 0 && (
-                    <span className="h-5 px-2 min-w-5 rounded-full bg-[#0D9488] text-white text-[11px] flex items-center justify-center font-bold shadow-sm">
-                      {chat.unreadCount}
-                    </span>
-                  )}
-
-                  {chat.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[10px] bg-white text-slate-500 px-2 py-0.5 rounded border border-slate-200 font-bold lowercase"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
+      <section className="flex-1 px-4 pb-6 overflow-y-auto custom-scrollbar space-y-3">
+        {conversations.map((chat) => (
+          <div
+            key={chat.id}
+            onClick={() => handleSelect(chat.id)}
+            className={`p-5 w-full rounded-2xl text-left transition-all duration-300 cursor-pointer relative ${
+              selectedId === chat.id
+                ? "bg-[#F0FDFA] border border-[#CCFBF1] shadow-sm"
+                : "hover:bg-gray-50 border border-transparent"
+            }`}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-bold text-[#0F172A] text-[15px]">
+                {chat.contactName}
+              </h3>
+              <span className="text-[11px] text-[#64748B] font-semibold">
+                {chat.timestamp}
+              </span>
             </div>
-          ))}
-        </section>
-      </div>
+            
+            <p className="text-[14px] text-[#475569] line-clamp-1 mb-4 leading-relaxed">
+              {chat.lastMessage}
+            </p>
+
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="px-3 py-1.5 text-[11px] font-bold text-[#1E293B] bg-white border border-[#E2E8F0] rounded-xl shadow-xs">
+                {chat.channel === "wa" ? "Whatsapp" : "Email"}
+              </span>
+              {chat.tags.slice(0, 2).map((tag) => (
+                <span
+                  key={tag}
+                  className="px-3 py-1.5 text-[11px] font-bold text-[#1E293B] bg-white border border-[#E2E8F0] rounded-xl shadow-xs"
+                >
+                  {tag.replace("-", " ")}
+                </span>
+              ))}
+              {chat.tags.length > 2 && (
+                <span className="px-2.5 py-1.5 text-[11px] font-bold text-[#1E293B] bg-white border border-[#E2E8F0] rounded-xl shadow-xs">
+                  +{chat.tags.length - 2}
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </section>
     </div>
   );
 };

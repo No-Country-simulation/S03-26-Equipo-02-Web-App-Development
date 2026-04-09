@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { 
-  ArrowLeft, 
-  Mail, 
-  Phone, 
-  Plus, 
-  MessageSquare, 
-  Tag, 
+import {
+  ArrowLeft,
+  Mail,
+  Phone,
+  Plus,
+  MessageSquare,
+  Tag,
   Mail as MailIcon,
   Clock,
   ChevronRight,
@@ -49,7 +49,7 @@ export default function ContactProfilePage() {
     return (
       <div className="p-10 text-center">
         <h2 className="text-xl font-bold text-slate-800">Contacto no encontrado</h2>
-        <button 
+        <button
           onClick={() => navigate("/contacts")}
           className="mt-4 text-[#0D9488] font-bold hover:underline"
         >
@@ -67,13 +67,13 @@ export default function ContactProfilePage() {
   };
 
   const toggleTagSelection = (tag: string) => {
-    setTempSelectedTags(prev => 
+    setTempSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
   };
 
   const handleSaveTags = () => {
-    setContacts(contacts.map(c => 
+    setContacts(contacts.map(c =>
       c.id === contact.id ? { ...c, tags: tempSelectedTags } : c
     ));
     setIsTagsModalOpen(false);
@@ -131,23 +131,23 @@ export default function ContactProfilePage() {
               </div>
 
               <div className="mb-6 relative">
-                 <input 
-                  type="text" 
-                  placeholder="Buscar etiquetas..." 
+                <input
+                  type="text"
+                  placeholder="Buscar etiquetas..."
                   className="w-full h-11 pl-4 pr-10 bg-[#F8FAFC] border border-slate-100 rounded-lg text-sm font-medium outline-none focus:ring-2 focus:ring-[#0D9488]/10"
-                 />
-                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               </div>
 
               <div className="space-y-1 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide mb-8">
                 {availableTags.map((tag) => (
-                  <label 
-                    key={tag} 
+                  <label
+                    key={tag}
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group"
                   >
                     <div className="relative flex items-center">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={tempSelectedTags.includes(tag)}
                         onChange={() => toggleTagSelection(tag)}
                         className="w-5 h-5 rounded border-slate-200 text-[#0D9488] focus:ring-[#0D9488] cursor-pointer"
@@ -155,8 +155,8 @@ export default function ContactProfilePage() {
                     </div>
                     <span className={cn(
                       "text-[13px] font-bold px-3 py-1 rounded-md transition-all",
-                      tempSelectedTags.includes(tag) 
-                        ? "bg-[#0D9488]/10 text-[#0D9488]" 
+                      tempSelectedTags.includes(tag)
+                        ? "bg-[#0D9488]/10 text-[#0D9488]"
                         : "bg-slate-50 text-slate-600"
                     )}>
                       {tag}
@@ -166,13 +166,13 @@ export default function ContactProfilePage() {
               </div>
 
               <div className="flex gap-3">
-                <button 
+                <button
                   onClick={() => setIsTagsModalOpen(false)}
                   className="flex-1 h-12 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all"
                 >
                   Cancelar
                 </button>
-                <button 
+                <button
                   onClick={handleSaveTags}
                   className="flex-1 h-12 bg-[#0D9488]/40 hover:bg-[#0D9488] text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-[#0D9488]/10"
                 >
@@ -185,7 +185,7 @@ export default function ContactProfilePage() {
       )}
 
       {/* Back button */}
-      <button 
+      <button
         onClick={() => navigate("/contacts")}
         className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors mb-8 cursor-pointer group"
       >
@@ -231,8 +231,8 @@ export default function ContactProfilePage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {contact.tags?.map((tag, idx) => (
-            <span 
-              key={idx} 
+            <span
+              key={idx}
               className={cn(
                 "px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
                 availableTags.includes(tag) ? "bg-[#F1F5F9] text-slate-600 border border-slate-200" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
@@ -241,7 +241,7 @@ export default function ContactProfilePage() {
               {tag.toLowerCase()}
             </span>
           ))}
-          <button 
+          <button
             onClick={handleOpenTagsModal}
             className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg text-slate-400 hover:text-slate-600 hover:border-slate-200 transition-all cursor-pointer"
           >
@@ -259,7 +259,7 @@ export default function ContactProfilePage() {
             className={cn(
               "px-6 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer",
               (activeTab === "Tareas" && tab.includes("Tareas")) || activeTab === tab
-                ? "bg-[#0D9488] text-white shadow-md shadow-[#0D9488]/20" 
+                ? "bg-[#0D9488] text-white shadow-md shadow-[#0D9488]/20"
                 : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
             )}
           >
@@ -276,7 +276,7 @@ export default function ContactProfilePage() {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] overflow-hidden">
               <div className="p-8">
                 <h3 className="text-lg font-bold text-slate-900 mb-8">Resumen de Actividad</h3>
-                
+
                 <div className="space-y-0 divide-y divide-slate-50">
                   <div className="py-6 flex justify-between items-center group cursor-pointer hover:bg-slate-50/50 -mx-8 px-8 transition-colors">
                     <div className="flex items-center gap-4">
@@ -325,7 +325,7 @@ export default function ContactProfilePage() {
               <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
                   <h3 className="text-lg font-bold text-slate-900">Último Mensaje</h3>
-                  <button 
+                  <button
                     onClick={() => navigate(`/tray?id=${contact.id}`)}
                     className="text-sm font-bold text-[#0D9488] hover:text-[#0f766c] flex items-center gap-1 group transition-colors cursor-pointer"
                   >
@@ -361,8 +361,8 @@ export default function ContactProfilePage() {
               <div className="space-y-5">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-800">Título de la Tarea</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Ej. Hacer seguimiento del contacto..."
                     value={taskForm.title}
                     onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
@@ -373,8 +373,8 @@ export default function ContactProfilePage() {
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-800">Fecha de Vencimiento</label>
                     <div className="relative">
-                      <input 
-                        type="date" 
+                      <input
+                        type="date"
                         value={taskForm.date}
                         onChange={(e) => setTaskForm({ ...taskForm, date: e.target.value })}
                         className="w-full h-12 px-4 bg-[#F8FAFC] border border-slate-100 rounded-lg text-sm font-medium text-slate-700 outline-none hover:ring-4 hover:ring-[#0D9488]/10 focus:ring-4 focus:ring-[#0D9488]/10 transition-all appearance-none cursor-pointer"
@@ -385,7 +385,7 @@ export default function ContactProfilePage() {
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-800">Prioridad</label>
                     <div className="relative">
-                      <select 
+                      <select
                         value={taskForm.priority}
                         onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value })}
                         className="w-full h-12 px-4 bg-[#F8FAFC] border border-slate-100 rounded-lg text-sm font-medium text-slate-700 hover:ring-4 hover:ring-[#0D9488]/10 focus:ring-4 focus:ring-[#0D9488]/10 outline-none transition-all appearance-none cursor-pointer"
@@ -399,7 +399,7 @@ export default function ContactProfilePage() {
                     </div>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={handleAddTask}
                   className="w-full h-12 bg-[#0D9488] text-white rounded-xl text-sm font-bold hover:bg-[#0f766c] shadow-lg shadow-[#0D9488]/20 transition-all active:scale-[0.98] cursor-pointer"
                 >
@@ -457,14 +457,14 @@ export default function ContactProfilePage() {
               <div className="space-y-5">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-800">Descripción</label>
-                  <textarea 
+                  <textarea
                     placeholder="Agregar una nota sobre este contacto..."
                     value={noteContent}
                     onChange={(e) => setNoteContent(e.target.value)}
                     className="w-full h-32 px-4 py-4 bg-[#F8FAFC] border border-slate-100 rounded-lg text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none hover:ring-4 hover:ring-[#0D9488]/10 focus:ring-4 focus:ring-[#0D9488]/10 transition-all resize-none"
                   />
                 </div>
-                <button 
+                <button
                   onClick={handleAddNote}
                   className="w-full h-12 bg-[#0D9488] text-white rounded-xl text-sm font-bold hover:bg-[#0f766c] shadow-lg shadow-[#0D9488]/20 transition-all active:scale-[0.98] cursor-pointer"
                 >
@@ -480,7 +480,7 @@ export default function ContactProfilePage() {
                   <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.03)] p-8">
                     <div className="flex justify-between items-start mb-4">
                       <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Agregada el {note.date}</span>
-                      <button 
+                      <button
                         onClick={() => setNotes(notes.filter(n => n.id !== note.id))}
                         className="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all cursor-pointer"
                       >

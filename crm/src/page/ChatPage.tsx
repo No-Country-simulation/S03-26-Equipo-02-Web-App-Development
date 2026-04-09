@@ -16,17 +16,17 @@ const ChatPage = () => {
   }, [urlId]);
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-screen bg-white">
       <MessageTray 
         selectedId={selectedContactId?.toString()} 
         onSelect={(id) => setSelectedContactId(Number(id))} 
       />
 
-      <div className="flex-1 min-w-0 bg-gray-50 border-r">
+      <div className="flex-1 flex flex-col min-w-0">
         <ChatWindow contactId={selectedContactId} />
       </div>
 
-      <div className="w-[320px] bg-gray-50">
+      <div className="w-[300px] border-l">
         <ChatActions contactId={selectedContactId} />
       </div>
     </div>
