@@ -34,6 +34,9 @@ export default function ContactsPage() {
   const navigate = useNavigate();
   const { contacts, setContacts } = useContacts();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("Todos");
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState<"CSV" | "PDF">("CSV");
   const [selectedContacts, setSelectedContacts] = useState<number[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -78,12 +81,13 @@ export default function ContactsPage() {
     );
   };
 
-  const handleExport = (format: "csv" | "pdf") => {
-    setNotification({ 
-      show: true, 
-      format: format.toUpperCase(),
+  const handleExport = () => {
+    setNotification({
+      show: true,
+      format: selectedFormat,
       message: "Puedes visualizarlo en tus descargas."
     });
+    setIsExportModalOpen(false);
   };
 
   const handleAddContact = () => {
@@ -95,13 +99,13 @@ export default function ContactsPage() {
       email: formData.email,
       phone: formData.phone,
       status: formData.status,
-      tags: ["Nuevo"], 
+      tags: ["Nuevo"],
     };
 
     setContacts([newContact, ...contacts]);
     setIsAddModalOpen(false);
     setFormData({ name: "", email: "", phone: "", status: "" });
-    
+
     setNotification({
       show: true,
       format: "CONTACTO",
@@ -120,7 +124,7 @@ export default function ContactsPage() {
   };
 
   return (
-    <div className="relative min-h-full p-6 lg:p-8 bg-[#FAFAFA]">
+    <div className="relative h-full overflow-y-auto p-6 lg:p-8 bg-[#FAFAFA] custom-scrollbar">
       {/* Toast Notification */}
       {notification.show && (
         <div className="fixed top-6 right-6 z-[100] animate-in slide-in-from-top-4 duration-300">
@@ -158,6 +162,78 @@ export default function ContactsPage() {
         </div>
       )}
 
+      {/* Export Modal */}
+      {isExportModalOpen && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[500px] overflow-hidden animate-in zoom-in-95 duration-200 relative p-8">
+            <button
+              onClick={() => setIsExportModalOpen(false)}
+              className="absolute top-6 right-6 w-10 h-10 bg-[#E11D48] text-white rounded-lg flex items-center justify-center hover:bg-rose-600 transition-colors shadow-sm cursor-pointer"
+            >
+              <X className="w-6 h-6 stroke-[3px]" />
+            </button>
+
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-slate-900">Exportar Contactos</h3>
+              <p className="text-sm font-semibold text-slate-500 mt-1">Selecciona el formato de exportación para las métricas y datos</p>
+            </div>
+
+            <div className="space-y-4 mb-8">
+              {/* Opción CSV */}
+              <div
+                onClick={() => setSelectedFormat("CSV")}
+                className={cn(
+                  "p-5 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-4 group",
+                  selectedFormat === "CSV"
+                    ? "bg-[#ECFDF5] border-[#0D9488]/30 shadow-sm"
+                    : "bg-white border-slate-100 hover:border-slate-200"
+                )}
+              >
+                <div className={cn(
+                  "w-12 h-12 rounded-xl flex items-center justify-center transition-colors shadow-sm",
+                  selectedFormat === "CSV" ? "bg-[#0D9488] text-white" : "bg-slate-50 text-slate-400 group-hover:bg-slate-100"
+                )}>
+                  <Download className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800">Exportar como CSV</h4>
+                  <p className="text-xs font-semibold text-slate-500 mt-0.5">Formato compatible con Excel y hojas de cálculo</p>
+                </div>
+              </div>
+
+              {/* Opción PDF */}
+              <div
+                onClick={() => setSelectedFormat("PDF")}
+                className={cn(
+                  "p-5 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-4 group",
+                  selectedFormat === "PDF"
+                    ? "bg-[#ECFDF5] border-[#0D9488]/30 shadow-sm"
+                    : "bg-white border-slate-100 hover:border-slate-200"
+                )}
+              >
+                <div className={cn(
+                  "w-12 h-12 rounded-xl flex items-center justify-center transition-colors shadow-sm",
+                  selectedFormat === "PDF" ? "bg-[#0D9488] text-white" : "bg-slate-50 text-slate-400 group-hover:bg-slate-100"
+                )}>
+                  <Download className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800">Exportar como PDF</h4>
+                  <p className="text-xs font-semibold text-slate-500 mt-0.5">Documento imprimible con formato profesional</p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleExport}
+              className="w-full py-4 bg-[#0D9488] text-white rounded-xl text-sm font-bold hover:bg-[#0f766c] shadow-lg shadow-[#0D9488]/20 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              Descargar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Add Contact Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -168,7 +244,7 @@ export default function ContactsPage() {
                   <h3 className="text-xl font-bold text-slate-900">Agregar Nuevo Contacto</h3>
                   <p className="text-sm font-semibold text-slate-500 mt-0.5">Agrega un nuevo contacto a tu lista.</p>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsAddModalOpen(false)}
                   className="w-10 h-8 rounded-lg bg-[#E11D48] text-white flex items-center justify-center hover:bg-rose-700 transition-colors shadow-sm cursor-pointer"
                 >
@@ -179,8 +255,8 @@ export default function ContactsPage() {
               <div className="space-y-5">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-800">Nombre</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Juan Pérez"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -189,8 +265,8 @@ export default function ContactsPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-800">Email</label>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     placeholder="juan@ejemplo.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -199,8 +275,8 @@ export default function ContactsPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-800">Teléfono</label>
-                  <input 
-                    type="tel" 
+                  <input
+                    type="tel"
                     placeholder="+54 11-68367166"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -210,7 +286,7 @@ export default function ContactsPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-800">Estado</label>
                   <div className="relative">
-                    <select 
+                    <select
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                       className="w-full h-12 px-4 bg-[#F8FAFC] border border-slate-100 rounded-lg text-sm font-medium text-slate-400 outline-none hover:ring-4 hover:ring-[#0D9488]/24 focus:ring-4 focus:ring-[#0D9488]/24 transition-all appearance-none cursor-pointer"
@@ -224,7 +300,7 @@ export default function ContactsPage() {
                 </div>
 
                 <div className="pt-2">
-                  <button 
+                  <button
                     onClick={handleAddContact}
                     disabled={!formData.name || !formData.email || !formData.phone || !formData.status}
                     className={cn(
@@ -253,7 +329,7 @@ export default function ContactsPage() {
           </p>
         </div>
 
-        <button 
+        <button
           onClick={() => setIsAddModalOpen(true)}
           className="h-11 px-5 bg-[#0D9488] text-white rounded-lg shadow-sm flex items-center justify-center gap-2 text-sm font-bold hover:bg-[#0f766c] transition-all active:scale-[0.98] cursor-pointer"
         >
@@ -288,24 +364,13 @@ export default function ContactsPage() {
             </button>
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="h-11 px-6 bg-white border border-slate-200 rounded-lg shadow-sm flex items-center justify-center gap-2 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
-                <Download className="w-4 h-4 text-slate-500" />
-                Exportar
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={() => handleExport("csv")} className="cursor-pointer">
-                <TableIcon className="w-4 h-4 mr-2" />
-                Exportar CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport("pdf")} className="cursor-pointer">
-                <FileText className="w-4 h-4 mr-2" />
-                Exportar PDF
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <button
+            onClick={() => setIsExportModalOpen(true)}
+            className="h-11 px-6 bg-white border border-slate-200 rounded-lg shadow-sm flex items-center justify-center gap-2 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+          >
+            <Download className="w-4 h-4 text-slate-500" />
+            Exportar
+          </button>
         </div>
       </div>
 
@@ -400,15 +465,14 @@ export default function ContactsPage() {
                     </div>
                   </td>
                   <td className="py-4 px-4">
-                    {contact.status === "Cliente" ? (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#0D9488] text-white">
-                        Cliente
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-white border border-slate-200 text-slate-700">
+                    <div className="flex items-center gap-2">
+                       <span className="inline-flex items-center px-3 py-1 rounded-lg text-[11px] font-extrabold bg-[#0D9488] text-white shadow-sm shadow-[#0D9488]/10">
                         {contact.status}
                       </span>
-                    )}
+                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-[11px] font-extrabold bg-white border border-slate-100 text-slate-700 shadow-sm">
+                        Whatsapp
+                      </span>
+                    </div>
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex flex-wrap gap-1.5">
@@ -430,14 +494,14 @@ export default function ContactsPage() {
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 p-1">
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => navigate(`/contacts/${contact.id}`)}
                           className="flex items-center gap-3 py-2.5 px-3 cursor-pointer rounded-lg hover:bg-slate-50"
                         >
                           <Eye className="w-4 h-4 text-slate-500" />
                           <span className="text-sm font-bold text-slate-700">Ver Detalles</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => navigate(`/tray?id=${contact.id}`)}
                           className="flex items-center gap-3 py-2.5 px-3 cursor-pointer rounded-lg hover:bg-slate-50"
                         >
@@ -449,7 +513,7 @@ export default function ContactsPage() {
                           <span className="text-sm font-bold text-slate-700">Editar</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="my-1 bg-slate-50" />
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => handleDeleteContact(contact.id)}
                           className="flex items-center gap-3 py-2.5 px-3 cursor-pointer rounded-lg bg-rose-500 hover:bg-rose-600 text-white transition-colors"
                         >

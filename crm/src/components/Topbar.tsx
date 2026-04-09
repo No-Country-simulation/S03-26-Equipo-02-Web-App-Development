@@ -12,10 +12,16 @@ const Topbar = () => {
     // Normalize path to ignore trailing slashes
     const normalizedPath = path === "/" ? "/" : path.replace(/\/$/, "");
 
-    if (normalizedPath === "/" || normalizedPath === "/dashboard") {
+    if (normalizedPath === "/dashboard") {
       return {
         title: "Dashboard",
         subtitle: `${contacts.length} registros activos`
+      };
+    }
+    if (normalizedPath === "/" || normalizedPath === "/tray") {
+      return {
+        title: "Bandeja",
+        subtitle: `${contacts.length} conversaciones activas`
       };
     }
     if (normalizedPath === "/contacts") {
@@ -30,12 +36,7 @@ const Topbar = () => {
         subtitle: "Visualizando perfil del cliente"
       };
     }
-    if (normalizedPath === "/tray") {
-      return {
-        title: "Bandeja",
-        subtitle: `${contacts.length} conversaciones activas`
-      };
-    }
+
     if (normalizedPath === "/tasks") {
       return {
         title: "Tareas",

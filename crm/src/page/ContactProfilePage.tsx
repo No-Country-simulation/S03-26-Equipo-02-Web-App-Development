@@ -114,7 +114,7 @@ export default function ContactProfilePage() {
   };
 
   return (
-    <div className="relative min-h-full p-6 lg:p-10 bg-[#FAFAFA] animate-in fade-in duration-300">
+    <div className="relative h-full overflow-y-auto p-6 lg:p-10 bg-[#FAFAFA] animate-in fade-in duration-300 custom-scrollbar">
       {/* Manage Tags Modal */}
       {isTagsModalOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -214,20 +214,13 @@ export default function ContactProfilePage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="px-4 py-1.5 bg-[#0D9488] text-white rounded-lg text-sm font-bold shadow-sm shadow-[#0D9488]/20">
+        <div className="flex items-center gap-2">
+          <span className="px-3 py-1 bg-[#0D9488] text-white rounded-lg text-[11px] font-extrabold shadow-sm shadow-[#0D9488]/10">
             {contact.status}
           </span>
-          <button className="px-4 py-1.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors shadow-sm cursor-pointer">
+          <span className="px-3 py-1 bg-white border border-slate-100 text-slate-700 rounded-lg text-[11px] font-extrabold shadow-sm shrink-0">
             Whatsapp
-          </button>
-          <button 
-            onClick={() => navigate(`/tray?id=${contact.id}`)}
-            className="px-4 py-1.5 bg-[#0D9488] text-white rounded-lg text-sm font-bold hover:bg-[#0f766c] transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
-          >
-             <MessageSquare className="w-4 h-4" />
-             Ver conversación
-          </button>
+          </span>
         </div>
       </div>
 
@@ -332,7 +325,10 @@ export default function ContactProfilePage() {
               <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
                   <h3 className="text-lg font-bold text-slate-900">Último Mensaje</h3>
-                  <button className="text-sm font-bold text-[#0D9488] hover:text-[#0f766c] flex items-center gap-1 group transition-colors cursor-pointer">
+                  <button 
+                    onClick={() => navigate(`/tray?id=${contact.id}`)}
+                    className="text-sm font-bold text-[#0D9488] hover:text-[#0f766c] flex items-center gap-1 group transition-colors cursor-pointer"
+                  >
                     Ver Conversación Completa
                     <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                   </button>

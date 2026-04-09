@@ -14,7 +14,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<MainLayout />}>
-            <Route index element={<DashboardPage />} />
+            <Route index element={<Chat />} />
+            <Route path="dashboard" element={<DashboardPage />} />
             <Route path="tray" element={<Chat />} />
             <Route path="contacts" element={<ContactsPage />} />
             <Route path="contacts/:id" element={<ContactProfilePage />} />

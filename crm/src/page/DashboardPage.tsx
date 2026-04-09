@@ -84,6 +84,8 @@ export default function DashboardPage() {
   const { contacts } = useContacts();
   const [days, setDays] = useState(7);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState<"CSV" | "PDF">("CSV");
   const [chartData, setChartData] = useState(initialData);
   const [notification, setNotification] = useState<{
     show: boolean;
@@ -112,12 +114,13 @@ export default function DashboardPage() {
     }, 1000);
   };
 
-  const handleExport = (format: "csv" | "pdf") => {
-    setNotification({ show: true, format: format.toUpperCase() });
+  const handleExport = () => {
+    setNotification({ show: true, format: selectedFormat });
+    setIsExportModalOpen(false);
   };
 
   return (
-    <div className="relative min-h-full p-6 lg:p-8 bg-[#FAFAFA]">
+    <div className="relative h-full overflow-y-auto p-6 lg:p-8 bg-[#FAFAFA] custom-scrollbar">
       {/* Toast Notification */}
       {notification.show && (
         <div className="fixed top-6 right-6 z-[100] animate-in slide-in-from-top-4 duration-300">
@@ -138,6 +141,78 @@ export default function DashboardPage() {
               className="ml-2 text-slate-400 hover:text-slate-600 transition-colors p-1"
             >
               <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Export Modal */}
+      {isExportModalOpen && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[500px] overflow-hidden animate-in zoom-in-95 duration-200 relative p-8">
+            <button 
+              onClick={() => setIsExportModalOpen(false)}
+              className="absolute top-6 right-6 w-10 h-10 bg-[#E11D48] text-white rounded-lg flex items-center justify-center hover:bg-rose-600 transition-colors shadow-sm cursor-pointer"
+            >
+              <X className="w-6 h-6 stroke-[3px]" />
+            </button>
+
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-slate-900">Exportar Dashboard</h3>
+              <p className="text-sm font-semibold text-slate-500 mt-1">Selecciona el formato de exportación para las métricas y datos</p>
+            </div>
+
+            <div className="space-y-4 mb-8">
+              {/* Opción CSV */}
+              <div 
+                onClick={() => setSelectedFormat("CSV")}
+                className={cn(
+                  "p-5 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-4 group",
+                  selectedFormat === "CSV" 
+                    ? "bg-[#ECFDF5] border-[#0D9488]/30 shadow-sm" 
+                    : "bg-white border-slate-100 hover:border-slate-200"
+                )}
+              >
+                <div className={cn(
+                  "w-12 h-12 rounded-xl flex items-center justify-center transition-colors shadow-sm",
+                  selectedFormat === "CSV" ? "bg-[#0D9488] text-white" : "bg-slate-50 text-slate-400 group-hover:bg-slate-100"
+                )}>
+                  <Download className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800">Exportar como CSV</h4>
+                  <p className="text-xs font-semibold text-slate-500 mt-0.5">Formato compatible con Excel y hojas de cálculo</p>
+                </div>
+              </div>
+
+              {/* Opción PDF */}
+              <div 
+                onClick={() => setSelectedFormat("PDF")}
+                className={cn(
+                  "p-5 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-4 group",
+                  selectedFormat === "PDF" 
+                    ? "bg-[#ECFDF5] border-[#0D9488]/30 shadow-sm" 
+                    : "bg-white border-slate-100 hover:border-slate-200"
+                )}
+              >
+                <div className={cn(
+                  "w-12 h-12 rounded-xl flex items-center justify-center transition-colors shadow-sm",
+                  selectedFormat === "PDF" ? "bg-[#0D9488] text-white" : "bg-slate-50 text-slate-400 group-hover:bg-slate-100"
+                )}>
+                  <Download className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800">Exportar como PDF</h4>
+                  <p className="text-xs font-semibold text-slate-500 mt-0.5">Documento imprimible con formato profesional</p>
+                </div>
+              </div>
+            </div>
+
+            <button 
+              onClick={handleExport}
+              className="w-full py-4 bg-[#0D9488] text-white rounded-xl text-sm font-bold hover:bg-[#0f766c] shadow-lg shadow-[#0D9488]/20 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              Descargar
             </button>
           </div>
         </div>
@@ -188,25 +263,13 @@ export default function DashboardPage() {
           </button>
 
           {/* Export button */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="h-10 px-4 bg-white border border-slate-200 rounded-md shadow-sm flex items-center justify-center gap-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
-                <Download className="w-4 h-4 text-slate-500" />
-                Exportar
-                <ChevronDown className="w-4 h-4 text-slate-500 ml-1 opacity-50" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={() => handleExport("csv")}>
-                <TableIcon className="w-4 h-4 mr-2" />
-                Exportar CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport("pdf")}>
-                <FileText className="w-4 h-4 mr-2" />
-                Exportar PDF
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <button 
+            onClick={() => setIsExportModalOpen(true)}
+            className="h-10 px-4 bg-[#0D9488] text-white rounded-md shadow-sm flex items-center justify-center gap-2 text-sm font-semibold hover:bg-[#0f766c] transition-colors cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            Exportar
+          </button>
         </div>
       </div>
 
