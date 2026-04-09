@@ -9,7 +9,7 @@ const ChatPage = () => {
     <div className="flex h-full">
       <MessageTray />
 
-      <div className="w-239  bg-gray-50 border-r">
+      <div className="w-239 bg-gray-50 border-r">
         <ChatWindow />
       </div>
 

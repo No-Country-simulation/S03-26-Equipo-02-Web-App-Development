@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { SearchIcon } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ConversationPreview } from "@/types/chatTray";
 
 const MOCK_CONVERSATIONS: ConversationPreview[] = [
@@ -58,48 +57,40 @@ const MOCK_CONVERSATIONS: ConversationPreview[] = [
 
 const MessageTray = () => {
   const [selectedId, setSelectedId] = useState<string>("3");
+  const tabs = ["Todas", "No leídos", "Prospectos", "Clientes"];
+  const [activeTab, setActiveTab] = useState("Todas");
+
   return (
     <div>
-      <div className="w-96 h-full bg-white border-r">
-        <header className="px-5 py-4 border-b border-border space-y-4">
-          <h1 className="text-lg font-semibold">Bandeja de Entrada</h1>
-          <div>
-            <Tabs defaultValue="conversaciones" className="w-full">
-              <TabsList className="w-full justify-start border-b">
-                <TabsTrigger
-                  value="conversaciones"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary"
-                >
-                  Todos
-                </TabsTrigger>
-                <TabsTrigger
-                  value="tareas"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary"
-                >
-                  No leídos {0}
-                </TabsTrigger>
-                <TabsTrigger
-                  value="prospectos"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary"
-                >
-                  Prospecto
-                </TabsTrigger>
-                <TabsTrigger
-                  value="clientes"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary"
-                >
-                  Clientes
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+      <div className="w-108.75 h-full p-6 bg-white border-r flex flex-col gap-5">
+        <header className="space-y-4">
+          <h1 className="text-black text-3xl font-bold font-['Inter'] leading-10">
+            Bandeja de Entrada
+          </h1>
+
+          <div className="flex items-center gap-1 bg-[#F8FAFC] p-1 rounded-lg w-fit">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-1 rounded-[3px] text-sm font-semibold transition-colors
+        ${
+          activeTab === tab
+            ? "bg-[#0D9488] text-white"
+            : "text-gray-500 bg-white"
+        }`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
 
-          <div className="overflow-hidden flex items-center gap-2 rounded-md border bg-white px-3 py-1">
-            <SearchIcon size={18} className="text-gray-500" />
+          <div className="relative w-full">
+            <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Buscar..."
-              className=" bg-transparent border-none focus:outline-none w-full hover"
+              placeholder="Buscar conversaciones..."
+              className="w-full h-10 pl-9 pr-3 rounded-xs border border-gray-200 text-sm text-gray-500 bg-[#F8FAFC] focus:outline-none"
             />
           </div>
         </header>
@@ -109,45 +100,37 @@ const MessageTray = () => {
             <div
               key={chat.id}
               onClick={() => setSelectedId(chat.id)}
-              className={`p-3.5 border-b w-full rounded-xl text-left transition-all duration-200 mb-1 group relative hover:bg-muted/60 border border-transparent hover:border-border/50 hover:shadow-sm ${
+              className={`p-3 w-full rounded-[5px] text-left transition-all duration-200 mb-2 group relative hover:border-border/50 hover:shadow-sm ${
                 selectedId === chat.id
-                  ? "bg-[#65bcac]/20 border-[#65bcac] shadow-sm"
+                  ? "bg-[#F0FDFA] shadow-md"
                   : ""
               }`}
             >
               <div className="flex justify-between items-start mb-2">
-                <h3 className="font-medium text-[15px] truncate pr-2 transition-colors text-foreground/85 group-hover:text-foreground">
+                <h3 className="font-bold text-[14px] truncate pr-2">
                   {chat.contactName}
                 </h3>
-                <span className="text-[11px] text-gray-400">
+                <span className="text-[12px] text-[#475569] font-semibold">
                   {chat.timestamp}
                 </span>
               </div>
-
-              <p className="text-[14px] mb-3 line-clamp-2 leading-relaxed text-muted-foreground group-hover:text-foreground/70">
+              <p className="text-[14px] mb-3 text-[#475569]">
                 {chat.lastMessage}
               </p>
 
               <div className="flex items-center justify-between">
                 <div className="flex gap-1.5 items-center flex-wrap">
-                  <div className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded border border-gray-200 capitalize">
+                  <div className="text-[12px] font-inter font-semibold bg-white p-2 text-center rounded-lg border border-[#E2E8F0]">
                     {chat.channel === "wa" ? (
-                      <span>WA</span>
+                      <span>Whatsapp</span>
                     ) : (
-                      <span>Mail</span>
+                      <span>Email</span>
                     )}
                   </div>
-
-                  {chat.unreadCount > 0 && (
-                    <span className="h-5 px-2 min-w-5 rounded-full bg-[#65bcac] from-primary to-primary/90 text-primary-foreground text-[11px] flex items-center justify-center font-semibold shadow-sm">
-                      {chat.unreadCount}
-                    </span>
-                  )}
-
                   {chat.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded border border-gray-200 capitalize"
+                      className="text-[12px] font-inter font-semibold bg-white p-2 text-center rounded-lg border border-[#E2E8F0] "
                     >
                       {tag.replace("-", " ")}
                     </span>
