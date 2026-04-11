@@ -10,6 +10,7 @@ import { SegmentType } from './enums/segment-type.enum';
 import { Message } from './message.entity';
 import { Tag } from './tag.entity';
 import { Task } from './task.entity';
+import { Note } from './note.entity';
 
 @Entity()
 export class Contact {
@@ -47,4 +48,7 @@ export class Contact {
 
   @OneToMany(() => Task, (task) => task.contact)
   tasks: Task[];
+
+  @OneToMany(() => Note, (note) => note.contact)
+  notes: Note[];
 }
