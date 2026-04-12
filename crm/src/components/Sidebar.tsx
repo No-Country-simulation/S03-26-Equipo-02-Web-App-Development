@@ -16,8 +16,8 @@ import {
 import { NavLink } from "react-router-dom";
 
 const navMain = [
-  { icon: MessageSquareText, label: "Bandeja", to: "/tray" },
-  { icon: LayoutDashboard, label: "Dashboard", to: "/" },
+  { icon: MessageSquareText, label: "Bandeja", to: "/" },
+  { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: Users, label: "Contactos", to: "/contacts" },
   { icon: SquareCheckBig, label: "Tareas", to: "/tasks" },
 ];
