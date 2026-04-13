@@ -1,0 +1,48 @@
+### ============================================================
+###  S03-26 Web App — Contactos API
+###  Base URL: http://localhost:3001
+###  Usar con la extensión REST Client (VS Code)
+### ============================================================
+
+@baseUrl = http://localhost:3001
+@contactId = 2889ddcb-61f6-4bee-a100-f9c2e2d9d0ef
+
+### Crear nota
+POST {{baseUrl}}/notes
+Content-Type: application/json
+
+{
+  "contactId": "{{contactId}}",
+  "description": "Primera nota"
+}
+
+###
+
+### Obtener todas
+GET {{baseUrl}}/notes
+
+###
+
+### Obtener una nota por ID
+GET {{baseUrl}}/notes/NOTE_ID
+Accept: application/json
+
+###
+
+### Obtener por contacto
+GET {{baseUrl}}/notes/contact/{{contactId}}
+
+###
+
+### Actualizar
+PATCH {{baseUrl}}/notes/NOTE_ID
+Content-Type: application/json
+
+{
+  "description": "Nota actualizada"
+}
+
+###
+
+### Eliminar
+DELETE {{baseUrl}}/notes/NOTE_ID
