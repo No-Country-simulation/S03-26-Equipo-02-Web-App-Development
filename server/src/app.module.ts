@@ -18,6 +18,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { BrevoModule } from './brevo/brevo.module';
 import { NotesModule } from './notes/notes.module';
 import { Note } from './entitys/note.entity';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { Note } from './entitys/note.entity';
     NotesModule,
     TwilioModule,
     BrevoModule,
+    MessagesModule,
 
     BullModule.forRootAsync({
       imports: [ConfigModule],

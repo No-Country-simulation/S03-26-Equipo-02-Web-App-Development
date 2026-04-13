@@ -1,0 +1,52 @@
+### ============================================================
+###  S03-26 Web App — Tareas (Tasks) API
+###  Base URL: http://localhost:3001
+###  Usar con la extensión REST Client (VS Code)
+### ============================================================
+
+@baseUrl = http://localhost:3001
+# ID de contacto ficticio para pruebas (Ricardo Pérez)
+@contactId = d290f1ee-6c54-4b01-90e6-d701748f0851
+
+### [1] Crear una nueva Tarea
+# Requiere un contactId válido
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+
+{
+  "contactId": "{{contactId}}",
+  "title": "Llamar para seguimiento",
+  "description": "El cliente está interesado en el plan premium. Llamar a las 3pm.",
+  "priority": "high",
+  "expirationDate": "2026-04-20T15:00:00Z"
+}
+
+###
+
+### [2] Obtener todas las Tareas
+GET {{baseUrl}}/tasks
+Accept: application/json
+
+###
+
+### [3] Obtener una Tarea por ID
+# Reemplazar TASK_ID con un UUID válido de la respuesta anterior
+@taskId = REEMPLAZAR_CON_TASK_ID
+GET {{baseUrl}}/tasks/{{taskId}}
+Accept: application/json
+
+###
+
+### [4] Actualizar una Tarea (Marcar como completada)
+PATCH {{baseUrl}}/tasks/{{taskId}}
+Content-Type: application/json
+
+{
+  "complete": true,
+  "priority": "medium"
+}
+
+###
+
+### [5] Eliminar una Tarea
+DELETE {{baseUrl}}/tasks/{{taskId}}
