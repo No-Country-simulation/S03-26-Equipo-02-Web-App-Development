@@ -40,7 +40,7 @@ const Topbar = () => {
     if (normalizedPath === "/tasks") {
       return {
         title: "Tareas",
-        subtitle: "12 tareas pendientes"
+        subtitle: "5 tareas pendientes"
       };
     }
     if (normalizedPath === "/settings") {
