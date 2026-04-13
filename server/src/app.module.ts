@@ -16,6 +16,9 @@ import { TasksModule } from './tasks/tasks.module';
 import { TwilioModule } from './twilio/twilio.module';
 import { BullModule } from '@nestjs/bullmq';
 import { BrevoModule } from './brevo/brevo.module';
+import { NotesModule } from './notes/notes.module';
+import { Note } from './entitys/note.entity';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -36,15 +39,25 @@ import { BrevoModule } from './brevo/brevo.module';
         ssl: {
           rejectUnauthorized: false,
         },
-        entities: [Contact, Message, Tag, Task, Analytics, Channel, Template],
+        entities: [
+          Contact,
+          Message,
+          Tag,
+          Task,
+          Note,
+          Analytics,
+          Channel,
+          Template,
+        ],
         synchronize: true, // Cambiado a true temporalmente para desarrollo si es necesario, o mantener false si ya hay migraciones
         logging: false,
       }),
     }),
     TasksModule,
-
+    NotesModule,
     TwilioModule,
     BrevoModule,
+    MessagesModule,
 
     BullModule.forRootAsync({
       imports: [ConfigModule],

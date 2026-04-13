@@ -19,7 +19,7 @@ export class ContactsService {
     if (!contact) {
       contact = this.contactRepository.create({
         phone,
-        firstName: firstName || phone,
+        firstName: firstName || 'Nuevo Cliente',
         lastName: '',
         segmentType: SegmentType.LEAD,
       });

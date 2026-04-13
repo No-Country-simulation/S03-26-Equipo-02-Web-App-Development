@@ -1,0 +1,52 @@
+### ============================================================
+###  S03-26 Web App — Notas API
+###  Base URL: http://localhost:3001
+###  Usar con la extensión REST Client (VS Code)
+### ============================================================
+
+@baseUrl = http://localhost:3001
+# ID de contacto ficticio para pruebas (Ricardo Pérez)
+@contactId = d290f1ee-6c54-4b01-90e6-d701748f0851
+
+### [1] Crear una Nota para un contacto
+POST {{baseUrl}}/notes
+Content-Type: application/json
+
+{
+  "contactId": "{{contactId}}",
+  "description": "El cliente prefiere contacto por las tardes. Tiene una deuda pendiente de 500 USD."
+}
+
+###
+
+### [2] Obtener todas las Notas del sistema
+GET {{baseUrl}}/notes
+Accept: application/json
+
+###
+
+### [3] Obtener una Nota específica por ID
+@noteId = REEMPLAZAR_CON_NOTE_ID
+GET {{baseUrl}}/notes/{{noteId}}
+Accept: application/json
+
+###
+
+### [4] Obtener todas las Notas de un contacto específico
+GET {{baseUrl}}/notes/contact/{{contactId}}
+Accept: application/json
+
+###
+
+### [5] Actualizar el contenido de una Nota
+PATCH {{baseUrl}}/notes/{{noteId}}
+Content-Type: application/json
+
+{
+  "description": "Nota actualizada: El cliente ya pagó la mitad de su deuda."
+}
+
+###
+
+### [6] Eliminar una Nota
+DELETE {{baseUrl}}/notes/{{noteId}}

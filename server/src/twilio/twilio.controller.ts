@@ -87,31 +87,6 @@ export class TwilioController {
   }
 
   /**
-   * GET /twilio/messages
-   * Lista todos los mensajes de WhatsApp recibidos/enviados.
-   */
-  @Get('messages')
-  async listAllMessages() {
-    return this.messageRepo.find({
-      relations: ['contact', 'channel'],
-      order: { createdAt: 'DESC' },
-    });
-  }
-
-  /**
-   * GET /twilio/messages/contact/:phone
-   * Lista mensajes de un contacto específico por su número de teléfono.
-   */
-  @Get('messages/contact/:phone')
-  async listMessagesByContact(@Param('phone') phone: string) {
-    return this.messageRepo.find({
-      where: { contact: { phone } },
-      relations: ['contact', 'channel'],
-      order: { createdAt: 'DESC' },
-    });
-  }
-
-  /**
    * POST /twilio/send
    * Envía un mensaje de WhatsApp a un contacto y lo persiste en la BD.
    */

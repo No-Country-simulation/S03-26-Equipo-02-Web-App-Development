@@ -24,6 +24,22 @@ export class BrevoController {
   }
 
   /**
+   * POST /brevo/send
+   * Envía un email transaccional (individual).
+   * Body: { to, subject, htmlContent }
+   */
+  @Post('send')
+  async sendEmail(@Body() dto: { to: string; subject: string; htmlContent: string }) {
+    try {
+      const result = await this.brevoService.sendTransactionalEmail(dto);
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      this.logger.error('Error al enviar email transaccional', error.response?.text || error.message);
+      return { success: false, error: error.response?.text || error.message };
+    }
+  }
+
+  /**
    * POST /brevo/webhooks
    * Recibe eventos de Brevo (aperturas, clicks, inbound).
    * Webhook security: ideally verify the Brevo IP or use a secret token.
