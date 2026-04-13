@@ -66,15 +66,15 @@ Content-Type: application/json
 ###
 
 # ─────────────────────────────────────────────────────────────
-# 📋 CONSULTAS — Historial y registros
+# 📋 CONSULTAS — Historial (Ahora en MessagesController)
 # ─────────────────────────────────────────────────────────────
 
 ### [5] Ver todos los mensajes de WhatsApp en la BD
-GET {{baseUrl}}/twilio/messages
+GET {{baseUrl}}/messages/whatsapp
 Accept: application/json
 
 ###
 
-### [6] Ver mensajes de un contacto específico
-GET {{baseUrl}}/twilio/messages/contact/{{testPhone}}
+### [6] Ver mensajes de un contacto específico (Historial multicanal)
+GET {{baseUrl}}/messages/contact/{{contactId}}
 Accept: application/json

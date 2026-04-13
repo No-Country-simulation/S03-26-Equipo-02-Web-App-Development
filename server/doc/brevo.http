@@ -5,10 +5,11 @@
 ### ============================================================
 
 #@baseUrl = http://localhost:3001
-@baseUrl = https://s03-26-equipo-02-web-app-development.onrender.com
+#@baseUrl = https://s03-26-equipo-02-web-app-development.onrender.com
+@baseUrl = http://localhost:3001
 
 # Email de prueba — reemplazá con un correo real para testear el tracking
-@testEmail = orlandocv0107@gmail.com.com
+@testEmail = orlandocv0107@gmail.com
 
 # ─────────────────────────────────────────────────────────────
 #  CAMPAÑAS — Envío de correos masivos
@@ -25,6 +26,20 @@ Content-Type: application/json
   "subject": "¡Novedades en nuestro servicio! 🚀",
   "htmlContent": "<h1>Hola!</h1><p>Estamos emocionados de compartir las nuevas actualizaciones.</p>",
   "listIds": [2]
+}
+
+###
+
+### [2] Enviar un email TRANSACCIONAL (Individual)
+# Este endpoint usa el TransactionalEmailsApi de Brevo.
+# Es ideal para enviar mensajes directos a un cliente desde el CRM.
+POST {{baseUrl}}/brevo/send
+Content-Type: application/json
+
+{
+  "to": "{{testEmail}}",
+  "subject": "¡Hola! Tenemos una actualización para ti",
+  "htmlContent": "<html><body><h1>Hola!</h1><p>Te escribimos desde el CRM para confirmar tu cita.</p></body></html>"
 }
 
 ###

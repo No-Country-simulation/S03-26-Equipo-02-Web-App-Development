@@ -1,0 +1,33 @@
+### ============================================================
+###  S03-26 Web App — Mensajería Unificada (Unified Messaging)
+###  Base URL: http://localhost:3001
+###  Usar con la extensión REST Client (VS Code)
+### ============================================================
+
+@baseUrl = http://localhost:3001
+# ID de contacto ficticio (Ricardo Pérez)
+@contactId = d290f1ee-6c54-4b01-90e6-d701748f0851
+
+### [1] Listar TODOS los mensajes (WhatsApp + Email)
+# Muestra el historial unificado ordenado por fecha descendente.
+GET {{baseUrl}}/messages
+Accept: application/json
+
+###
+
+### [2] Listar solo mensajes de WHATSAPP
+GET {{baseUrl}}/messages/whatsapp
+Accept: application/json
+
+###
+
+### [3] Listar solo mensajes de EMAIL (Brevo)
+GET {{baseUrl}}/messages/email
+Accept: application/json
+
+###
+
+### [4] Listar historial por CONTACTO (Multicanal)
+# Muestra todos los WhatsApp y Emails intercambiados con este contacto.
+GET {{baseUrl}}/messages/contact/{{contactId}}
+Accept: application/json
