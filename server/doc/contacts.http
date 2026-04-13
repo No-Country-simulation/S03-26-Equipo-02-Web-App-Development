@@ -5,54 +5,44 @@
 ### ============================================================
 
 @baseUrl = http://localhost:3001
-@contactId = 2889ddcb-61f6-4bee-a100-f9c2e2d9d0ef
 
-# ─────────────────────────────────────────────────────────────
-# 👥 CONTACTOS — Endpoints para gestión de contactos
-# ─────────────────────────────────────────────────────────────
-
-### [1] Obtener todos los contactos
-GET {{baseUrl}}/contacts
-Accept: application/json
-
-###
-
-### [2] Crear un nuevo contacto
-# @name createContact
+### [1] Crear un nuevo Contacto (Ficticio)
 POST {{baseUrl}}/contacts
 Content-Type: application/json
 
 {
-  "firstName": "Juan",
+  "firstName": "Ricardo",
   "lastName": "Pérez",
-  "email": "juan.perez@example.com",
-  "phone": "+123456789",
+  "email": "ricardo.perez@example.com",
+  "phone": "+5491122334455",
   "segmentType": "lead"
 }
 
 ###
 
-### [3] Obtener un contacto por ID
-# Reemplaza el ID con uno real obtenido del GET ALL
+### [2] Obtener todos los Contactos
+GET {{baseUrl}}/contacts
+Accept: application/json
 
+###
+
+### [3] Obtener un Contacto por ID
+@contactId = d290f1ee-6c54-4b01-90e6-d701748f0851
 GET {{baseUrl}}/contacts/{{contactId}}
 Accept: application/json
 
 ###
 
-### [4] Actualizar un contacto (PATCH)
+### [4] Actualizar datos de un Contacto
 PATCH {{baseUrl}}/contacts/{{contactId}}
 Content-Type: application/json
 
 {
-  "lastName": "Pérez Modificado",
+  "lastName": "Pérez García",
   "segmentType": "client"
 }
 
 ###
 
-### [5] Eliminar un contacto
+### [5] Eliminar un Contacto
 DELETE {{baseUrl}}/contacts/{{contactId}}
-Accept: application/json
-
-###
