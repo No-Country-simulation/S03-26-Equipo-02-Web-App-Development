@@ -1,0 +1,12 @@
+### Dashboard
+GET http://localhost:3001/analytics/dashboard
+
+###
+
+### Mensajes en el tiempo
+GET http://localhost:3001/analytics/messages-over-time
+
+###
+
+### Actividad reciente
+GET http://localhost:3001/analytics/recent-activity
