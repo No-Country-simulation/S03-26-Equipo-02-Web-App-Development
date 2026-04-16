@@ -1,10 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { SegmentType } from './enums/segment-type.enum';
 import { Message } from './message.entity';
@@ -51,4 +53,10 @@ export class Contact {
 
   @OneToMany(() => Note, (note) => note.contact)
   notes: Note[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

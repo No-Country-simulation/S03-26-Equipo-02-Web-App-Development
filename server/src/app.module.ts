@@ -19,6 +19,7 @@ import { BrevoModule } from './brevo/brevo.module';
 import { NotesModule } from './notes/notes.module';
 import { Note } from './entitys/note.entity';
 import { MessagesModule } from './messages/messages.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { MessagesModule } from './messages/messages.module';
         },
       }),
     }),
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

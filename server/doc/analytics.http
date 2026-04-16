@@ -1,0 +1,41 @@
+### ============================================================
+###  S03-26 Web App — Analytics API
+###  Base URL: http://localhost:3001
+###  Usar con la extensión REST Client (VS Code)
+### ============================================================
+
+@baseUrl = http://localhost:3001
+
+### [1] Obtener estadísticas del Dashboard (7 días por defecto)
+GET {{baseUrl}}/analytics/dashboard
+Accept: application/json
+
+###
+
+### [2] Obtener estadísticas del Dashboard (rango personalizado)
+GET {{baseUrl}}/analytics/dashboard?range=15
+Accept: application/json
+
+###
+
+### [3] Obtener mensajes en el tiempo (7 días)
+GET {{baseUrl}}/analytics/messages-over-time
+Accept: application/json
+
+###
+
+### [4] Obtener mensajes en el tiempo (30 días)
+GET {{baseUrl}}/analytics/messages-over-time?range=30
+Accept: application/json
+
+###
+
+### [5] Obtener actividad reciente (últimos 5 registros)
+GET {{baseUrl}}/analytics/recent-activity
+Accept: application/json
+
+###
+
+### [6] Obtener toda la actividad
+GET {{baseUrl}}/analytics/recent-activity/all
+Accept: application/json
