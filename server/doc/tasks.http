@@ -4,7 +4,8 @@
 ###  Usar con la extensión REST Client (VS Code)
 ### ============================================================
 
-@baseUrl = http://localhost:3001
+@baseUrl = https://s03-26-equipo-02-web-app-development.onrender.com
+
 # ID de contacto ficticio para pruebas (Ricardo Pérez)
 @contactId = d290f1ee-6c54-4b01-90e6-d701748f0851
 
@@ -14,7 +15,7 @@ POST {{baseUrl}}/tasks
 Content-Type: application/json
 
 {
-  "contactId": "{{contactId}}",
+  "contactId": "4feda875-5768-4884-84c9-3b3d428710f7",
   "title": "Llamar para seguimiento",
   "description": "El cliente está interesado en el plan premium. Llamar a las 3pm.",
   "priority": "high",

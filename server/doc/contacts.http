@@ -4,7 +4,7 @@
 ###  Usar con la extensión REST Client (VS Code)
 ### ============================================================
 
-@baseUrl = http://localhost:3001
+@baseUrl = https://s03-26-equipo-02-web-app-development.onrender.com
 
 ### [1] Crear un nuevo Contacto (Ficticio)
 POST {{baseUrl}}/contacts

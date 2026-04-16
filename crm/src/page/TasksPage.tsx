@@ -5,8 +5,9 @@ import {
   Clock,
   Check,
   X,
+  Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,57 +24,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { useContacts } from "@/context/useContacts";
+import { getTasks, createTask, updateTask, deleteTask } from "../services/tasks";
 
-const allTasks = [
-  {
-    id: 1,
-    title: "Hacer seguimiento con Sarah sobre agendamiento de demo",
-    dueDate: "Vence hoy",
-    user: { name: "Sarah Johnnson", initials: "SJ" },
-    priority: "Media",
-    completed: false
-  },
-  {
-    id: 2,
-    title: "Enviar propuesta de precios a Michael",
-    dueDate: "Vence el 24/3/2026",
-    user: { name: "Michael Chen", initials: "MC" },
-    priority: "Alta",
-    completed: false
-  },
-  {
-    id: 3,
-    title: "Revisar progreso de onboarding de Lisa",
-    dueDate: "Vence el 26/3/2026",
-    user: { name: "Lisa Thompson", initials: "LT" },
-    priority: "Baja",
-    completed: false
-  },
-  {
-    id: 4,
-    title: "Compartir documentos de cumplimiento de seguridad con David",
-    dueDate: "Vence hoy",
-    user: { name: "David Park", initials: "DP" },
-    priority: "Alta",
-    completed: false
-  },
-  {
-    id: 5,
-    title: "Preparar demo personalizada para el equipo de Sarah",
-    dueDate: "Vence el 16/4/2026",
-    user: { name: "Sarah Johnnson", initials: "SJ" },
-    priority: "Alta",
-    completed: false
-  },
-  {
-    id: 6,
-    title: "Enviar email de bienvenida a Emma",
-    dueDate: "22/3/2026",
-    user: { name: "Emma Davis", initials: "ED" },
-    priority: "Alta",
-    completed: true
-  }
+const dbContacts = [
+  { id: "4feda875-5768-4884-84c9-3b3d428710f7", name: "Orlando" },
+  { id: "ed413a96-d81c-457a-a96d-2f1227d41b71", name: "startupcrm" },
+  { id: "a4116cab-4339-4c50-adeb-cf4ac163b321", name: "Cliente Interesado" },
+  { id: "0aca79b0-fcd3-47df-ba8a-c7463a801d9d", name: "Nuevo Cliente" },
+  { id: "0df2eb7d-ba86-4a3a-80f7-460284a5bcb2", name: "Ricardo Pérez" }
 ];
 
 const PriorityBadge = ({ priority }: { priority: string }) => {
@@ -90,10 +48,10 @@ const PriorityBadge = ({ priority }: { priority: string }) => {
   );
 };
 
-const TaskItem = ({ task }: { task: any }) => {
+const TaskItem = ({ task, onToggle, onDelete }: { task: any, onToggle: (id: string, currentStatus: boolean) => void, onDelete: (id: string) => void }) => {
   return (
     <div className={`p-5 bg-white border border-slate-100 rounded-2xl flex items-center gap-5 transition-all hover:shadow-md hover:border-slate-200 ${task.completed ? 'opacity-80' : ''}`}>
-      <div className="flex-shrink-0 cursor-pointer">
+      <div className="flex-shrink-0 cursor-pointer" onClick={() => onToggle(task.id, task.completed)}>
         {task.completed ? (
           <div className="w-6 h-6 bg-[#0D9488] rounded-md flex items-center justify-center shadow-sm">
             <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -133,55 +91,76 @@ const TaskItem = ({ task }: { task: any }) => {
           <PriorityBadge priority={task.priority} />
         )}
       </div>
+      <button 
+        onClick={() => onDelete(task.id)}
+        className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:bg-rose-50 hover:text-rose-500 transition-colors cursor-pointer"
+        title="Eliminar tarea"
+      >
+        <Trash2 size={16} />
+      </button>
     </div>
   );
 };
 
-const AddTaskModal = ({ isOpen, onClose, onAddTask }: { isOpen: boolean; onClose: () => void; onAddTask: (task: any) => void }) => {
-  const { contacts } = useContacts();
+const AddTaskModal = ({ isOpen, onClose, onRefresh }: { isOpen: boolean; onClose: () => void; onRefresh: () => void }) => {
   const [title, setTitle] = useState("");
   const [selectedContact, setSelectedContact] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState("");
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !priority) return;
+    if (!title || !priority || !selectedContact || !dueDate) return;
 
-    const contactObj = contacts.find(c => c.name === selectedContact) || contacts[0];
+    setLoading(true);
+    try {
+      const priorityMap: Record<string, "high" | "medium" | "low"> = {
+        "Alta": "high",
+        "Media": "medium",
+        "Baja": "low"
+      };
 
-    onAddTask({
-      id: Date.now(),
-      title,
-      dueDate: dueDate || "Próximamente",
-      user: { 
-        name: contactObj?.name || "Sin asignar", 
-        initials: contactObj?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || "U" 
-      },
-      priority,
-      completed: false
-    });
+      const contactObj = dbContacts.find(c => c.name === selectedContact);
+      if (!contactObj) {
+        setLoading(false);
+        return;
+      }
 
-    // Reset form
-    setTitle("");
-    setSelectedContact("");
-    setDueDate("");
-    setPriority("");
-    onClose();
+      await createTask({
+        contactId: contactObj.id, // now properly passing the UUID
+        title,
+        priority: priorityMap[priority],
+        expirationDate: new Date(dueDate).toISOString()
+      });
+      
+      onRefresh();
+
+      // Reset form
+      setTitle("");
+      setSelectedContact("");
+      setDueDate("");
+      setPriority("");
+      onClose();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const isFormValid = title && priority;
+  const isFormValid = title && priority && selectedContact && dueDate && !loading;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[40] flex items-center justify-center p-4">
       {/* Overlay */}
-      <div 
+      <div
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
         onClick={onClose}
       />
-      
+
       {/* Modal Content */}
       <div className="relative bg-white w-full max-w-[850px] rounded-[40px] p-14 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-5 duration-300">
         <div className="flex justify-between items-start mb-12">
@@ -189,7 +168,7 @@ const AddTaskModal = ({ isOpen, onClose, onAddTask }: { isOpen: boolean; onClose
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">Crear Nueva Tarea</h2>
             <p className="text-base font-bold text-slate-400">Agrega una nueva tarea a tu lista.</p>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95 shadow-lg shadow-rose-500/20 group cursor-pointer"
           >
@@ -200,10 +179,10 @@ const AddTaskModal = ({ isOpen, onClose, onAddTask }: { isOpen: boolean; onClose
         <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-3">
             <label className="text-sm font-black text-slate-800 ml-1">Título de la Tarea</label>
-            <Input 
+            <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ej. Hacer seguimiento con..." 
+              placeholder="Ej. Hacer seguimiento con..."
               className="h-16 rounded-2xl border-slate-100 bg-slate-50/50 px-6 font-bold text-slate-700 placeholder:text-slate-300 focus-visible:ring-[#0D9488]/10 focus-visible:border-[#0D9488]"
             />
           </div>
@@ -214,8 +193,8 @@ const AddTaskModal = ({ isOpen, onClose, onAddTask }: { isOpen: boolean; onClose
               <SelectTrigger className="w-full h-16 rounded-2xl border-slate-100 bg-slate-50/50 px-6 font-bold text-slate-700 focus:ring-[#0D9488]/10 focus:border-[#0D9488]">
                 <SelectValue placeholder="Seleccionar Contacto" />
               </SelectTrigger>
-              <SelectContent sideOffset={0} className="rounded-2xl border-slate-100 p-2 shadow-xl z-[110]">
-                {contacts.map(contact => (
+              <SelectContent sideOffset={0} className="rounded-2xl border-slate-100 p-2 shadow-xl z-50">
+                {dbContacts.map(contact => (
                   <SelectItem key={contact.id} value={contact.name}>{contact.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -225,7 +204,7 @@ const AddTaskModal = ({ isOpen, onClose, onAddTask }: { isOpen: boolean; onClose
           <div className="flex flex-col gap-3">
             <label className="text-sm font-black text-slate-800 ml-1">Fecha de Vencimiento</label>
             <div className="relative">
-              <Input 
+              <Input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
@@ -240,7 +219,7 @@ const AddTaskModal = ({ isOpen, onClose, onAddTask }: { isOpen: boolean; onClose
               <SelectTrigger className="w-full h-16 rounded-2xl border-slate-100 bg-slate-50/50 px-6 font-bold text-slate-700 focus:ring-[#0D9488]/10 focus:border-[#0D9488]">
                 <SelectValue placeholder="Seleccionar Prioridad" />
               </SelectTrigger>
-              <SelectContent sideOffset={0} className="rounded-2xl border-slate-100 p-2 shadow-xl z-[110]">
+              <SelectContent sideOffset={0} className="rounded-2xl border-slate-100 p-2 shadow-xl z-50">
                 <SelectItem value="Alta">Prioridad Alta</SelectItem>
                 <SelectItem value="Media">Prioridad Media</SelectItem>
                 <SelectItem value="Baja">Prioridad Baja</SelectItem>
@@ -248,17 +227,17 @@ const AddTaskModal = ({ isOpen, onClose, onAddTask }: { isOpen: boolean; onClose
             </Select>
           </div>
 
-          <button 
+          <button
             type="submit"
             disabled={!isFormValid}
             className={cn(
               "mt-4 h-14 px-10 self-end font-black rounded-2xl transition-all shadow-lg text-sm uppercase tracking-widest",
-              isFormValid 
-                ? "bg-[#0D9488] text-white hover:bg-[#0A7A6F] shadow-[#0D9488]/20 cursor-pointer" 
+              isFormValid
+                ? "bg-[#0D9488] text-white hover:bg-[#0A7A6F] shadow-[#0D9488]/20 cursor-pointer"
                 : "bg-slate-50 text-slate-300 cursor-not-allowed"
             )}
           >
-            Crear Tarea
+            {loading ? "Creando..." : "Crear Tarea"}
           </button>
         </form>
       </div>
@@ -267,13 +246,77 @@ const AddTaskModal = ({ isOpen, onClose, onAddTask }: { isOpen: boolean; onClose
 };
 
 const TasksPage = () => {
-  const [tasks, setTasks] = useState(allTasks);
+  const [tasks, setTasks] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("Todas las Tareas");
   const [priorityFilter, setPriorityFilter] = useState("Todas las Prioridades");
 
-  const addTask = (newTask: any) => {
-    setTasks([newTask, ...tasks]);
+  const fetchTasks = async () => {
+    try {
+      const response = await getTasks();
+      // En caso de que el backend devuelva { success: true, data: [...] }
+      const tasksData = Array.isArray(response) ? response : (response.data || []);
+      
+      const formatted = tasksData.map((t: any) => {
+        const contactId = t.contact?.id || t.contactId;
+        const fallbackName = t.contact?.firstName ? `${t.contact.firstName} ${t.contact.lastName || ''}`.trim() : 'Desconocido';
+        const contact = dbContacts.find(c => c.id === contactId) || { name: fallbackName, id: contactId };
+        const priorityMap: Record<string, string> = {
+          high: "Alta",
+          medium: "Media",
+          low: "Baja"
+        };
+        const dateObj = t.expirationDate ? new Date(t.expirationDate) : null;
+        let formattedDate = "Sin fecha";
+        if (dateObj && !isNaN(dateObj.getTime())) {
+          formattedDate = dateObj.toLocaleDateString();
+        }
+
+        return {
+          id: t.id,
+          title: t.title,
+          dueDate: formattedDate,
+          user: {
+            name: contact.name,
+            initials: contact.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || "U"
+          },
+          priority: priorityMap[t.priority] || "Media",
+          completed: t.complete === true || t.completed === true || t.status === "completed"
+        };
+      });
+      setTasks(formatted);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  useEffect(() => {
+    const pendingCount = tasks.filter(t => !t.completed).length;
+    window.dispatchEvent(new CustomEvent("tasksUpdated", { detail: pendingCount }));
+  }, [tasks]);
+
+  const handleToggleComplete = async (taskId: string, currentStatus: boolean) => {
+    try {
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: !currentStatus } : t));
+      await updateTask(taskId, { complete: !currentStatus });
+    } catch (e) {
+      console.error(e);
+      fetchTasks(); // revert on error
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      setTasks(prev => prev.filter(t => t.id !== taskId));
+      await deleteTask(taskId);
+    } catch (e) {
+      console.error(e);
+      fetchTasks(); // revert on error
+    }
   };
 
   const filteredTasks = tasks.filter(task => {
@@ -305,7 +348,7 @@ const TasksPage = () => {
             <span className="text-sm font-bold text-slate-600">{tasks.filter(t => t.completed).length} completadas</span>
           </div>
         </div>
-        <Button 
+        <Button
           onClick={() => setIsModalOpen(true)}
           className="bg-[#0D9488] hover:bg-[#0A7A6F] text-white font-black px-10 py-5 rounded-xl flex items-center gap-3 shadow-lg shadow-[#0D9488]/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
         >
@@ -314,7 +357,7 @@ const TasksPage = () => {
         </Button>
       </div>
 
-      <AddTaskModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAddTask={addTask} />
+      <AddTaskModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={fetchTasks} />
 
       {/* Filter section */}
       <div className="flex gap-4">
@@ -335,8 +378,8 @@ const TasksPage = () => {
                 onClick={() => setStatusFilter(label)}
                 className={cn(
                   "flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-[15px] my-1",
-                  statusFilter === label 
-                    ? "bg-[#0D9488] text-white hover:bg-[#0D9488] hover:text-white" 
+                  statusFilter === label
+                    ? "bg-[#0D9488] text-white hover:bg-[#0D9488] hover:text-white"
                     : "text-slate-600 hover:bg-slate-50 hover:text-[#0D9488]"
                 )}
               >
@@ -346,7 +389,7 @@ const TasksPage = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <div className="bg-white border border-slate-200 shadow-sm rounded-xl px-5 py-3 flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-all min-w-[220px] justify-between">
@@ -361,8 +404,8 @@ const TasksPage = () => {
                 onClick={() => setPriorityFilter(label)}
                 className={cn(
                   "flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-[15px] my-1",
-                  priorityFilter === label 
-                    ? "bg-[#0D9488] text-white hover:bg-[#0D9488] hover:text-white" 
+                  priorityFilter === label
+                    ? "bg-[#0D9488] text-white hover:bg-[#0D9488] hover:text-white"
                     : "text-slate-600 hover:bg-slate-50 hover:text-[#0D9488]"
                 )}
               >
@@ -380,7 +423,7 @@ const TasksPage = () => {
           <h2 className="text-2xl font-black text-[#0F172A]">Tareas Pendientes</h2>
           <div className="flex flex-col gap-4">
             {pendingTasks.length > 0 ? (
-              pendingTasks.map(task => <TaskItem key={task.id} task={task} />)
+              pendingTasks.map(task => <TaskItem key={task.id} task={task} onToggle={handleToggleComplete} onDelete={handleDeleteTask} />)
             ) : (
               <p className="text-slate-400 text-sm font-bold py-4">No hay tareas pendientes que coincidan con los filtros.</p>
             )}
@@ -394,7 +437,7 @@ const TasksPage = () => {
           <h2 className="text-2xl font-black text-[#0F172A]">Tareas Completadas</h2>
           <div className="flex flex-col gap-4">
             {completedTasks.length > 0 ? (
-              completedTasks.map(task => <TaskItem key={task.id} task={task} />)
+              completedTasks.map(task => <TaskItem key={task.id} task={task} onToggle={handleToggleComplete} onDelete={handleDeleteTask} />)
             ) : (
               <p className="text-slate-400 text-sm font-bold py-4">No hay tareas completadas que coincidan con los filtros.</p>
             )}
