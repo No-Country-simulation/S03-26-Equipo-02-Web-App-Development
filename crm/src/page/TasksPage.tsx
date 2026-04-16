@@ -26,13 +26,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getTasks, createTask, updateTask, deleteTask } from "../services/tasks";
 
-const dbContacts = [
-  { id: "4feda875-5768-4884-84c9-3b3d428710f7", name: "Orlando" },
-  { id: "ed413a96-d81c-457a-a96d-2f1227d41b71", name: "startupcrm" },
-  { id: "a4116cab-4339-4c50-adeb-cf4ac163b321", name: "Cliente Interesado" },
-  { id: "0aca79b0-fcd3-47df-ba8a-c7463a801d9d", name: "Nuevo Cliente" },
-  { id: "0df2eb7d-ba86-4a3a-80f7-460284a5bcb2", name: "Ricardo Pérez" }
-];
+// Fecth de contactos desde el backend en vez de hardcodeado
+const fetchContacts = async () => {
+  try {
+    const API_URL = import.meta.env.VITE_API_URL || "https://s03-26-equipo-02-web-app-development.onrender.com";
+    const res = await fetch(`${API_URL}/contacts`);
+    const data = await res.json();
+    return Array.isArray(data) ? data : data.data || [];
+  } catch (error) {
+    console.error("Error fetching contacts:", error);
+    return [];
+  }
+};
 
 const PriorityBadge = ({ priority }: { priority: string }) => {
   const solidStyles: Record<string, string> = {
@@ -102,7 +107,7 @@ const TaskItem = ({ task, onToggle, onDelete }: { task: any, onToggle: (id: stri
   );
 };
 
-const AddTaskModal = ({ isOpen, onClose, onRefresh }: { isOpen: boolean; onClose: () => void; onRefresh: () => void }) => {
+const AddTaskModal = ({ isOpen, onClose, onRefresh, dbContacts }: { isOpen: boolean; onClose: () => void; onRefresh: () => void; dbContacts: any[] }) => {
   const [title, setTitle] = useState("");
   const [selectedContact, setSelectedContact] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -123,14 +128,14 @@ const AddTaskModal = ({ isOpen, onClose, onRefresh }: { isOpen: boolean; onClose
         "Baja": "low"
       };
 
-      const contactObj = dbContacts.find(c => c.name === selectedContact);
+      const contactObj = dbContacts.find(c => c.id === selectedContact);
       if (!contactObj) {
         setLoading(false);
         return;
       }
 
       await createTask({
-        contactId: contactObj.id, // now properly passing the UUID
+        contactId: contactObj.id,
         title,
         priority: priorityMap[priority],
         expirationDate: new Date(dueDate).toISOString()
@@ -193,9 +198,9 @@ const AddTaskModal = ({ isOpen, onClose, onRefresh }: { isOpen: boolean; onClose
               <SelectTrigger className="w-full h-16 rounded-2xl border-slate-100 bg-slate-50/50 px-6 font-bold text-slate-700 focus:ring-[#0D9488]/10 focus:border-[#0D9488]">
                 <SelectValue placeholder="Seleccionar Contacto" />
               </SelectTrigger>
-              <SelectContent sideOffset={0} className="rounded-2xl border-slate-100 p-2 shadow-xl z-50">
+              <SelectContent sideOffset={0} className="rounded-2xl border-slate-100 p-2 shadow-xl z-50 max-h-[300px] overflow-y-auto">
                 {dbContacts.map(contact => (
-                  <SelectItem key={contact.id} value={contact.name}>{contact.name}</SelectItem>
+                  <SelectItem key={contact.id} value={contact.id}>{contact.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -247,20 +252,33 @@ const AddTaskModal = ({ isOpen, onClose, onRefresh }: { isOpen: boolean; onClose
 
 const TasksPage = () => {
   const [tasks, setTasks] = useState<any[]>([]);
+  const [dbContacts, setDbContacts] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("Todas las Tareas");
   const [priorityFilter, setPriorityFilter] = useState("Todas las Prioridades");
 
+  useEffect(() => {
+    fetchContacts().then(contacts => {
+      // Formatear para uso en modal y nombres
+      const formatted = contacts.map((c: any) => ({
+        id: c.id,
+        name: c.firstName ? `${c.firstName} ${c.lastName || ''}`.trim() : 'Desconocido'
+      }));
+      setDbContacts(formatted);
+    });
+  }, []);
+
   const fetchTasks = async () => {
     try {
       const response = await getTasks();
-      // En caso de que el backend devuelva { success: true, data: [...] }
       const tasksData = Array.isArray(response) ? response : (response.data || []);
       
       const formatted = tasksData.map((t: any) => {
         const contactId = t.contact?.id || t.contactId;
         const fallbackName = t.contact?.firstName ? `${t.contact.firstName} ${t.contact.lastName || ''}`.trim() : 'Desconocido';
-        const contact = dbContacts.find(c => c.id === contactId) || { name: fallbackName, id: contactId };
+        const contactFromDb = dbContacts.find(c => c.id === contactId);
+        const contactName = contactFromDb ? contactFromDb.name : fallbackName;
+        
         const priorityMap: Record<string, string> = {
           high: "Alta",
           medium: "Media",
@@ -277,8 +295,8 @@ const TasksPage = () => {
           title: t.title,
           dueDate: formattedDate,
           user: {
-            name: contact.name,
-            initials: contact.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || "U"
+            name: contactName,
+            initials: contactName !== 'Desconocido' ? contactName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : "U"
           },
           priority: priorityMap[t.priority] || "Media",
           completed: t.complete === true || t.completed === true || t.status === "completed"
@@ -291,8 +309,9 @@ const TasksPage = () => {
   };
 
   useEffect(() => {
+    // Al cargar componentes, e idealmente despues de cargar contactos, cargamos las tareas
     fetchTasks();
-  }, []);
+  }, [dbContacts]);
 
   useEffect(() => {
     const pendingCount = tasks.filter(t => !t.completed).length;
@@ -305,7 +324,7 @@ const TasksPage = () => {
       await updateTask(taskId, { complete: !currentStatus });
     } catch (e) {
       console.error(e);
-      fetchTasks(); // revert on error
+      fetchTasks();
     }
   };
 
@@ -315,16 +334,14 @@ const TasksPage = () => {
       await deleteTask(taskId);
     } catch (e) {
       console.error(e);
-      fetchTasks(); // revert on error
+      fetchTasks();
     }
   };
 
   const filteredTasks = tasks.filter(task => {
-    // Status Filter
     if (statusFilter === "Pendientes" && task.completed) return false;
     if (statusFilter === "Completadas" && !task.completed) return false;
 
-    // Priority Filter
     if (priorityFilter !== "Todas las Prioridades") {
       const p = priorityFilter.replace("Prioridad ", "");
       if (task.priority !== p) return false;
@@ -338,7 +355,6 @@ const TasksPage = () => {
 
   return (
     <div className="p-10 bg-[#FBFDFF] min-h-screen flex flex-col gap-10">
-      {/* Header section */}
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-2">
           <h1 className="text-4xl font-black text-[#0F172A] tracking-tight">Tareas</h1>
@@ -357,9 +373,8 @@ const TasksPage = () => {
         </Button>
       </div>
 
-      <AddTaskModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={fetchTasks} />
+      <AddTaskModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={fetchTasks} dbContacts={dbContacts} />
 
-      {/* Filter section */}
       <div className="flex gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -417,7 +432,6 @@ const TasksPage = () => {
         </DropdownMenu>
       </div>
 
-      {/* Pending Tasks */}
       {(statusFilter === "Todas las Tareas" || statusFilter === "Pendientes") && (
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-black text-[#0F172A]">Tareas Pendientes</h2>
@@ -431,7 +445,6 @@ const TasksPage = () => {
         </div>
       )}
 
-      {/* Completed Tasks */}
       {(statusFilter === "Todas las Tareas" || statusFilter === "Completadas") && (
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-black text-[#0F172A]">Tareas Completadas</h2>
@@ -449,3 +462,4 @@ const TasksPage = () => {
 };
 
 export default TasksPage;
+
