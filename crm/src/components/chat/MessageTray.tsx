@@ -1,67 +1,74 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SearchIcon } from "lucide-react";
 import { useContacts } from "@/context/useContacts";
+import type { ApiMessage } from "@/types/ApiMessage";
 
-const MOCK_CHAT_METADATA = [
-  {
-    contactEmail: "sarah@empresa.com",
-    lastMessage: "¡Gracias por la rápida respuesta! La demo fue excelente.",
-    timestamp: "10:23 AM",
-    unreadCount: 2,
-    channel: "wa",
-  },
-  {
-    contactEmail: "m.chen@startup.com",
-    lastMessage: "¿Podríamos agendar una demo para el equipo técnico?",
-    timestamp: "Ayer",
-    unreadCount: 1,
-    channel: "email",
-  },
-  {
-    contactEmail: "d.park@techfirm.com",
-    lastMessage: "Necesito los documentos de cumplimiento de seguridad actualizados.",
-    timestamp: "Hace 5 horas",
-    unreadCount: 0,
-    channel: "email",
-  },
-];
 
 interface MessageTrayProps {
   selectedId?: string;
   onSelect?: (id: string) => void;
 }
 
-const MessageTray = ({ selectedId: controlledId, onSelect }: MessageTrayProps) => {
-  const [internalSelectedId, setInternalSelectedId] = useState<string>("2");
+const MessageTray = ({selectedId: controlledId,onSelect,}: MessageTrayProps) => {
+  
+  const [internalSelectedId, setInternalSelectedId] = useState<string>("");
   const [activeTab, setActiveTab] = useState("Todas");
   const { contacts } = useContacts();
+  const [messages, setMessages] = useState<ApiMessage[]>([]);
 
   const selectedId = controlledId || internalSelectedId;
   const tabs = ["Todas", "No leídos", "Prospectos", "Clientes"];
+
+  useEffect(() => {
+    fetch("https://s03-26-equipo-02-web-app-development.onrender.com/messages")
+      .then((res) => res.json())
+      .then((json) => setMessages(json.data));
+  }, [messages]);
 
   const handleSelect = (id: string) => {
     if (onSelect) onSelect(id);
     setInternalSelectedId(id);
   };
 
-  const conversations = contacts.map((contact, index) => {
-    const mock = MOCK_CHAT_METADATA.find(m => 
-      m.contactEmail.toLowerCase() === contact.email.toLowerCase() ||
-      (contact.name.toLowerCase().includes("sarah") && m.contactEmail.includes("sarah"))
-    ) || MOCK_CHAT_METADATA[index % MOCK_CHAT_METADATA.length];
+  const conversationMap = new Map<string, ApiMessage>();
+
+  for (const msg of messages) {
+    const contactId = msg.contact.id;
+    const existing = conversationMap.get(contactId);
+
+    if (!existing || new Date(msg.createdAt) > new Date(existing.createdAt)) {
+      conversationMap.set(contactId, msg);
+    }
+  }
+
+  const unreadCountMap = new Map<string, number>();
+
+  for (const msg of messages) {
+    if (!msg.isRead) {
+      const count = unreadCountMap.get(msg.contact.id) || 0;
+      unreadCountMap.set(msg.contact.id, count + 1);
+    }
+  }
+
+  const conversations = Array.from(conversationMap.values()).map((msg) => {
+    const localContact = contacts.find((c) => c.email === msg.contact.email);
 
     return {
-      id: contact.id.toString(),
-      contactName: contact.name,
-      contactEmail: contact.email,
-      lastMessage: mock.lastMessage,
-      timestamp: mock.timestamp,
-      unreadCount: mock.unreadCount,
-      channel: mock.channel,
-      tags: contact.tags || [],
+      id: msg.contact.id,
+      contactName: `${msg.contact.firstName} ${msg.contact.lastName}`.trim(),
+      contactEmail: msg.contact.email,
+      lastMessage: msg.content,
+      timestamp: msg.createdAt,
+      unreadCount: unreadCountMap.get(msg.contact.id) || 0,
+      channel: msg.channel.type,
+      tags: localContact?.tags || ["cliente", "interesado"],
     };
   });
 
+  const channelLabel: Record<string, string> = {
+    whatsapp: "Whatsapp",
+    email: "Email",
+  };
   return (
     <div className="w-[380px] h-screen bg-white border-r flex flex-col overflow-hidden">
       <header className="p-6 space-y-6">
@@ -89,7 +96,10 @@ const MessageTray = ({ selectedId: controlledId, onSelect }: MessageTrayProps) =
         </div>
 
         <div className="relative w-full">
-          <SearchIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+          <SearchIcon
+            size={18}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"
+          />
           <input
             type="text"
             placeholder="Buscar conversaciones..."
@@ -114,17 +124,20 @@ const MessageTray = ({ selectedId: controlledId, onSelect }: MessageTrayProps) =
                 {chat.contactName}
               </h3>
               <span className="text-[11px] text-[#64748B] font-semibold">
-                {chat.timestamp}
+                    {new Date(chat.timestamp).toLocaleTimeString("es-AR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
               </span>
             </div>
-            
+
             <p className="text-[14px] text-[#475569] line-clamp-1 mb-4 leading-relaxed">
               {chat.lastMessage}
             </p>
 
             <div className="flex flex-wrap gap-2 items-center">
               <span className="px-3 py-1.5 text-[11px] font-bold text-[#1E293B] bg-white border border-[#E2E8F0] rounded-xl shadow-xs">
-                {chat.channel === "wa" ? "Whatsapp" : "Email"}
+                {channelLabel[chat.channel] ?? chat.channel}
               </span>
               {chat.tags.slice(0, 2).map((tag) => (
                 <span

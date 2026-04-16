@@ -14,7 +14,7 @@ import {
 
 import { useContacts } from "@/context/useContacts";
 
-const ChatActions = ({ contactId }: { contactId: number | null }) => {
+const ChatActions = ({ contactId }: { contactId: string | null }) => {
   const { contacts } = useContacts();
   const contact = contacts.find(c => c.id === contactId) || contacts[0];
 
