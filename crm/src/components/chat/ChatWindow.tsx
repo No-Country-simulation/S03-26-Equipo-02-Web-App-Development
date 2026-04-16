@@ -55,7 +55,7 @@ const ChatWindow = ({ contactId }: { contactId: number | null }) => {
   if (!contact) return null;
 
   const handleStatusChange = (newStatus: string) => {
-     setContacts(contacts.map(c => 
+    setContacts(contacts.map(c =>
       c.id === contact.id ? { ...c, status: newStatus } : c
     ));
     setOpen(false);
@@ -91,22 +91,20 @@ const ChatWindow = ({ contactId }: { contactId: number | null }) => {
               <div className="absolute top-full mt-2 right-0 w-44 bg-white border border-[#E2E8F0] rounded-2xl shadow-2xl z-20 overflow-hidden p-2 animate-in fade-in zoom-in-95 duration-200">
                 <button
                   onClick={() => handleStatusChange("prospecto")}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 text-[13px] font-bold rounded-xl transition-all ${
-                    contact.status?.toLowerCase() === "prospecto"
+                  className={`w-full flex items-center justify-between px-4 py-2.5 text-[13px] font-bold rounded-xl transition-all ${contact.status?.toLowerCase() === "prospecto"
                       ? "bg-[#0D9488] text-white"
                       : "text-[#475569] hover:bg-[#F0FDFA] hover:text-[#0D9488]"
-                  }`}
+                    }`}
                 >
                   <span>Prospecto</span>
                   {contact.status?.toLowerCase() === "prospecto" && <span className="text-lg">✓</span>}
                 </button>
                 <button
                   onClick={() => handleStatusChange("cliente")}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 text-[13px] font-bold rounded-xl transition-all mt-1 ${
-                    contact.status?.toLowerCase() === "cliente"
+                  className={`w-full flex items-center justify-between px-4 py-2.5 text-[13px] font-bold rounded-xl transition-all mt-1 ${contact.status?.toLowerCase() === "cliente"
                       ? "bg-[#0D9488] text-white"
                       : "text-[#475569] hover:bg-[#F0FDFA] hover:text-[#0D9488]"
-                  }`}
+                    }`}
                 >
                   <span>Cliente</span>
                   {contact.status?.toLowerCase() === "cliente" && <span className="text-lg">✓</span>}
@@ -128,13 +126,12 @@ const ChatWindow = ({ contactId }: { contactId: number | null }) => {
               Hoy
             </p>
           </div>
-          
+
           {chatMessages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex ${
-                msg.sender === "me" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"
+                }`}
             >
               <div className={`flex flex-col ${msg.sender === "me" ? "items-end" : "items-start"} max-w-[75%]`}>
                 {msg.sender === "other" && msg.name && (
@@ -142,20 +139,18 @@ const ChatWindow = ({ contactId }: { contactId: number | null }) => {
                 )}
 
                 <div
-                  className={`relative rounded-xl px-4 py-3 text-[14px] leading-relaxed shadow-sm transition-all duration-200 ${
-                    msg.sender === "me"
+                  className={`relative rounded-xl px-4 py-3 text-[14px] leading-relaxed shadow-sm transition-all duration-200 ${msg.sender === "me"
                       ? "bg-[#0D9488] text-white rounded-br-none"
                       : "bg-white text-[#334155] border border-[#E2E8F0] rounded-bl-none"
-                  }`}
+                    }`}
                 >
                   <p className="font-medium">{msg.text}</p>
 
                   <span
-                    className={`block text-[10px] font-bold mt-2.5 ${
-                      msg.sender === "me"
+                    className={`block text-[10px] font-bold mt-2.5 ${msg.sender === "me"
                         ? "text-teal-100 text-right"
                         : "text-[#94A3B8]"
-                    }`}
+                      }`}
                   >
                     {msg.time}
                   </span>
