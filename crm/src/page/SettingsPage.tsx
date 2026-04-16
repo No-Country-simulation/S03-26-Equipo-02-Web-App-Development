@@ -23,7 +23,7 @@ const SettingsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   return (
-    <div className="p-8 flex flex-col gap-6 h-full bg-white">
+    <div className="p-8 flex flex-col gap-6 bg-white">
       <div>
         <h1 className="text-[32px] font-bold mb-2">Ajustes</h1>
         <p className="text-sm font-bold">
@@ -52,7 +52,7 @@ const SettingsPage = () => {
           />
         </div>
 
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full gap-2">
           {initialTags.map((tag) => (
             <div
               key={tag.id}
