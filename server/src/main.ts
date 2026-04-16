@@ -23,7 +23,7 @@ async function bootstrap() {
   app.enableCors({
     origin: '*',
     credentials: true,
-    methods: 'GET,HEAD,POST,PUT,DELETE,OPTIONS',
+    methods: 'GET,HEAD,POST,PUT,DELETE,OPTIONS,PATCH',
   });
 
   app.useGlobalInterceptors(new ResponseInterceptor());
