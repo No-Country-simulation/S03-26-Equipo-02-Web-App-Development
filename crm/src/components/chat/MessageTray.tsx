@@ -175,6 +175,8 @@ const conversations = [...conversationsWithMessages, ...conversationsWithoutMess
             </div>
           </div>
         ))}
+        <div className="h-8" />
+        <div className="h-4" />
       </section>
     </div>
   );
