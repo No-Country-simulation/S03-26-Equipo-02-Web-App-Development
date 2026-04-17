@@ -547,7 +547,7 @@ const Contacts = () => {
                     <div className="bg-white rounded-[28px] border border-gray-200 shadow-xl shadow-gray-200/10 p-5 mt-5">
                       <div className="flex items-center justify-between gap-3 mb-4">
                         <h3 className="text-sm font-black text-slate-950">Último Mensaje</h3>
-                        <button 
+                        <button
                           onClick={() => navigate('/tray')}
                           className="text-xs font-bold text-[#0D9488] hover:text-[#0F766E] transition"
                         >

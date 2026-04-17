@@ -21,6 +21,7 @@ export default function ContactProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [contact, setContact] = useState<ApiContact | null>(null);
+  const [taskCount, setTaskCount] = useState<number>(0);
 
 useEffect(() => {
   if (!id) return;
@@ -124,18 +125,18 @@ useEffect(() => {
 
       {/* Navigation Tabs */}
       <div className="flex gap-2 p-1.5 bg-slate-100/50 rounded-xl w-fit mb-8 border border-slate-50 shadow-sm">
-        {["Resumen", `Tareas (${tasks.length})`, "Notas"].map((tab) => (
+        {["Resumen", "Tareas", "Notas"].map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab.includes("Tareas") ? "Tareas" : tab)}
+            onClick={() => setActiveTab(tab)}
             className={cn(
               "px-6 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer",
-              (activeTab === "Tareas" && tab.includes("Tareas")) || activeTab === tab
+              activeTab === tab
                 ? "bg-[#0D9488] text-white shadow-md shadow-[#0D9488]/20"
                 : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
             )}
           >
-            {tab}
+            {tab === "Tareas" ? `Tareas (${taskCount})` : tab}
           </button>
         ))}
       </div>
@@ -146,7 +147,7 @@ useEffect(() => {
         )}
 
         {activeTab === "Tareas" && (
-          <CreateTaskForm />
+          <CreateTaskForm contactId={contact.id} contactName={`${contact.firstName} ${contact.lastName}`} onTaskCountChange={setTaskCount} />
         )}
 
         {activeTab === "Notas" && (
