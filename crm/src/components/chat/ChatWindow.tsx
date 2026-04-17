@@ -68,7 +68,7 @@ const ChatWindow = ({ contactId, contact }: ChatWindowProps) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: contact.email,
-            subject: "Mensaje desde el CRM",
+            subject: "",
             htmlContent: `<p>${messageText}</p>`,
           }),
         },
@@ -175,7 +175,7 @@ const ChatWindow = ({ contactId, contact }: ChatWindowProps) => {
                       : "bg-white text-[#334155] border border-[#E2E8F0] rounded-bl-none"
                   }`}
                 >
-                  <p className="font-medium">{msg.content}</p>
+                  <p className="font-medium whitespace-pre-line">{msg.content}</p>
 
                   <span
                     className={`block text-[10px] font-bold mt-2.5 ${

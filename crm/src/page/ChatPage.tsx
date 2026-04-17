@@ -4,12 +4,20 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import ChatActions from "@/components/chat/ChatActions";
 import { useSearchParams } from "react-router-dom";
 import type { ApiMessage } from "@/types/ApiMessage";
-
+import type { ApiContact } from "@/types/ApiContacts";
 const ChatPage = () => {
   const [searchParams] = useSearchParams();
   const urlId = searchParams.get("id");
   const [selectedContactId, setSelectedContactId] = useState<string | null>(urlId ?? null);
   const [messages, setMessages] = useState<ApiMessage[]>([]);
+    const [contacts, setContacts] = useState<ApiContact[]>([]); // 👈 nuevo estado
+
+  // Cargar contactos
+  useEffect(() => {
+    fetch("https://s03-26-equipo-02-web-app-development.onrender.com/contacts") // Ajusta la URL según tu backend
+      .then(res => res.json())
+      .then(data => setContacts(data.data || data));
+  }, []);
 
   useEffect(() => {
     fetch("https://s03-26-equipo-02-web-app-development.onrender.com/messages")
@@ -24,9 +32,9 @@ const ChatPage = () => {
           setSelectedContactId(latest.contact.id);
         }
       });
-  }, [selectedContactId]);
+  }, [selectedContactId, messages]);
 
-const selectedContact = messages.find(m => m.contact.id === selectedContactId)?.contact ?? null;
+const selectedContact = contacts.find(c => c.id === selectedContactId) ?? null;
 
   return (
     <div className="flex h-screen bg-white">
