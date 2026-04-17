@@ -1,10 +1,29 @@
 import { Bell } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useContacts } from "@/context/useContacts";
+import { useState, useEffect } from "react";
+import { getTasks } from "@/services/tasks";
 
 const Topbar = () => {
   const location = useLocation();
   const { contacts } = useContacts();
+  const [tasksCount, setTasksCount] = useState(0);
+
+  useEffect(() => {
+    // Obtener las tareas al montar el componente
+    getTasks().then(res => {
+      const data = Array.isArray(res) ? res : (res?.data || []);
+      setTasksCount(data.filter((t:any) => !t.complete && !t.completed && t.status !== "completed").length);
+    }).catch(e => console.error(e));
+
+    // Escuchar el evento que emitirá TasksPage
+    const handleTasksUpdate = (e: any) => {
+      setTasksCount(e.detail);
+    };
+    window.addEventListener("tasksUpdated", handleTasksUpdate);
+    
+    return () => window.removeEventListener("tasksUpdated", handleTasksUpdate);
+  }, []);
 
   const getPageInfo = () => {
     const path = location.pathname;
@@ -40,7 +59,7 @@ const Topbar = () => {
     if (normalizedPath === "/tasks") {
       return {
         title: "Tareas",
-        subtitle: "12 tareas pendientes"
+        subtitle: `${tasksCount} tareas pendientes`
       };
     }
     if (normalizedPath === "/settings") {

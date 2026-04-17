@@ -53,10 +53,4 @@ export class Contact {
 
   @OneToMany(() => Note, (note) => note.contact)
   notes: Note[];
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

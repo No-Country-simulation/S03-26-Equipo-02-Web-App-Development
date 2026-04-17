@@ -33,7 +33,6 @@ export default function ContactsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
-
   const [contacts, setContactsTest] = useState<ApiContact[]>([]);
 
   useEffect(() => {
@@ -64,6 +63,25 @@ export default function ContactsPage() {
     );
   };
 
+  const handleDeleteContact = async (id: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `https://s03-26-equipo-02-web-app-development.onrender.com/contacts/${id}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al eliminar contacto");
+      }
+      setContactsTest((prev) => prev.filter((c) => c.id !== id));
+      setSelectedContacts((prev) => prev.filter((cId) => cId !== id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="relative h-full overflow-y-auto p-6 lg:p-8 bg-[#FAFAFA] custom-scrollbar">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 mt-2">
@@ -86,6 +104,9 @@ export default function ContactsPage() {
         <AddContacModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
+          onContactCreated={(newContact) =>
+            setContactsTest((prev) => [newContact, ...prev])
+          }
         />
       </div>
 
@@ -269,7 +290,12 @@ export default function ContactsPage() {
                           </span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="my-1 bg-slate-50" />
-                        <DropdownMenuItem className="flex items-center gap-3 py-2.5 px-3 cursor-pointer rounded-lg bg-rose-500 hover:bg-rose-600 text-white transition-colors">
+                        <DropdownMenuItem
+                          className="flex items-center gap-3 py-2.5 px-3 cursor-pointer rounded-lg bg-rose-500 hover:bg-rose-600 text-white transition-colors"
+                          onClick={() => {
+                            handleDeleteContact(contact.id);
+                          }}
+                        >
                           <Trash2 className="w-4 h-4 text-white" />
                           <span className="text-sm font-bold">Eliminar</span>
                         </DropdownMenuItem>

@@ -1,29 +1,34 @@
 import { useState, useEffect } from "react";
 import { SearchIcon } from "lucide-react";
-import { useContacts } from "@/context/useContacts";
 import type { ApiMessage } from "@/types/ApiMessage";
-
+import type { ApiContact } from "@/types/ApiContacts";
 
 interface MessageTrayProps {
   selectedId?: string;
   onSelect?: (id: string) => void;
 }
 
+
 const MessageTray = ({selectedId: controlledId,onSelect,}: MessageTrayProps) => {
   
   const [internalSelectedId, setInternalSelectedId] = useState<string>("");
   const [activeTab, setActiveTab] = useState("Todas");
-  const { contacts } = useContacts();
   const [messages, setMessages] = useState<ApiMessage[]>([]);
 
   const selectedId = controlledId || internalSelectedId;
   const tabs = ["Todas", "No leídos", "Prospectos", "Clientes"];
 
-  useEffect(() => {
-    fetch("https://s03-26-equipo-02-web-app-development.onrender.com/messages")
-      .then((res) => res.json())
-      .then((json) => setMessages(json.data));
-  }, [messages]);
+const [allContacts, setAllContacts] = useState<ApiContact[]>([]);
+
+useEffect(() => {
+  fetch("https://s03-26-equipo-02-web-app-development.onrender.com/messages")
+    .then(res => res.json())
+    .then(json => setMessages(json.data));
+
+  fetch("https://s03-26-equipo-02-web-app-development.onrender.com/contacts")
+    .then(res => res.json())
+    .then(json => setAllContacts(json.data));
+}, []);
 
   const handleSelect = (id: string) => {
     if (onSelect) onSelect(id);
@@ -50,20 +55,35 @@ const MessageTray = ({selectedId: controlledId,onSelect,}: MessageTrayProps) => 
     }
   }
 
-  const conversations = Array.from(conversationMap.values()).map((msg) => {
-    const localContact = contacts.find((c) => c.email === msg.contact.email);
+const conversationsWithMessages = Array.from(conversationMap.values()).map(msg => ({
+  id: msg.contact.id,
+  contactName: `${msg.contact.firstName} ${msg.contact.lastName}`.trim(),
+  contactEmail: msg.contact.email,
+  lastMessage: msg.content,
+  timestamp: msg.createdAt,
+  unreadCount: unreadCountMap.get(msg.contact.id) || 0,
+  channel: msg.channel.type,
+  tags: ["Cliente", "Interesado"],
+}));
 
-    return {
-      id: msg.contact.id,
-      contactName: `${msg.contact.firstName} ${msg.contact.lastName}`.trim(),
-      contactEmail: msg.contact.email,
-      lastMessage: msg.content,
-      timestamp: msg.createdAt,
-      unreadCount: unreadCountMap.get(msg.contact.id) || 0,
-      channel: msg.channel.type,
-      tags: localContact?.tags || ["cliente", "interesado"],
-    };
-  });
+// IDs que ya tienen mensajes
+const contactIdsWithMessages = new Set(conversationsWithMessages.map(c => c.id));
+
+// Contactos sin mensajes
+const conversationsWithoutMessages = allContacts
+  .filter(c => !contactIdsWithMessages.has(c.id))
+  .map(c => ({
+    id: c.id,
+    contactName: `${c.firstName} ${c.lastName}`.trim(),
+    contactEmail: c.email,
+    lastMessage: "Sin mensajes",
+    timestamp: "",
+    unreadCount: 0,
+    channel: c.phone ? "whatsapp" : "email",
+    tags: [],
+  }));
+
+const conversations = [...conversationsWithMessages, ...conversationsWithoutMessages];
 
   const channelLabel: Record<string, string> = {
     whatsapp: "Whatsapp",
