@@ -9,6 +9,7 @@ interface MessageTrayProps {
   onSelect?: (id: string) => void;
 }
 
+
 const MessageTray = ({selectedId: controlledId,onSelect,}: MessageTrayProps) => {
   
   const [internalSelectedId, setInternalSelectedId] = useState<string>("");

@@ -40,7 +40,7 @@ const selectedContact = messages.find(m => m.contact.id === selectedContactId)?.
       </div>
 
       <div className="w-75 border-l">
-        <ChatActions contactId={selectedContactId} />
+        <ChatActions contactId={selectedContactId} contact={selectedContact} />
       </div>
     </div>
   );

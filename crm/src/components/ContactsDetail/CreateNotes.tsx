@@ -1,22 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
+import type { ApiNotes } from "@/types/ApiNotes";
 
-const CreateNotes = () => {
-    const [notes, setNotes] = useState([
-    { id: 1, date: "3/4/2026", content: "Decisora clave en TechCorp. Interesada en plan enterprise. Hacer seguimiento sobre cronograma de implementación y necesidades de capacitación del equipo." }
-  ]);
+interface CreateNotesProps {
+  contactId: string;
+}
+
+const CreateNotes = ({ contactId }: CreateNotesProps) => {
   const [noteContent, setNoteContent] = useState("");
-    const handleAddNote = () => {
-    if (!noteContent) return;
-    const newNote = {
-      id: Date.now(),
-      date: new Date().toLocaleDateString(),
-      content: noteContent
-    };
-    setNotes([newNote, ...notes]);
-    setNoteContent("");
+  const [notes, setNotes] = useState<ApiNotes[]>([]);
+  const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!contactId) return;
+
+    fetch(
+      `https://s03-26-equipo-02-web-app-development.onrender.com/notes/contact/${contactId}`,
+    )
+      .then((res) => res.json())
+      .then((json) => setNotes(json.data));
+  }, [contactId]);
+
+  const handleAddNote = async () => {
+    if (!noteContent.trim() || loading) return;
+    setLoading(true);
+
+    try {
+      const res = await fetch(
+        "https://s03-26-equipo-02-web-app-development.onrender.com/notes",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contactId, description: noteContent }),
+        },
+      );
+      const json = await res.json();
+      setNotes((prev) => [json.data, ...prev]);
+      setNoteContent("");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      setNotes((prev) => prev.filter((n) => n.id !== noteId));
+      await fetch(
+        `https://s03-26-equipo-02-web-app-development.onrender.com/notes/${noteId}`,
+        {
+          method: "DELETE",
+        },
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
       {/* Add Note Form */}
@@ -50,19 +91,18 @@ const CreateNotes = () => {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.03)] p-8">
               <div className="flex justify-between items-start mb-4">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Agregada el {note.date}
+                  Agregada el{" "}
+                  {new Date(note.createdAt).toLocaleDateString("es-AR")}
                 </span>
                 <button
-                  onClick={() =>
-                    setNotes(notes.filter((n) => n.id !== note.id))
-                  }
+                  onClick={() => handleDeleteNote(note.id)}
                   className="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
               <p className="text-sm font-bold text-slate-800 leading-relaxed">
-                {note.content}
+                {note.description}
               </p>
             </div>
           </div>
