@@ -38,8 +38,7 @@ const ChatWindow = ({ contactId, contact }: ChatWindowProps) => {
 
   useEffect(() => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop =
-        scrollContainerRef.current.scrollHeight;
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
     }
   }, [contact?.id, chatMessages]);
 
@@ -49,30 +48,24 @@ const ChatWindow = ({ contactId, contact }: ChatWindowProps) => {
     if (!messageText.trim()) return;
 
     if (contact?.phone) {
-      await fetch(
-        "https://s03-26-equipo-02-web-app-development.onrender.com/twilio/send",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: `whatsapp:${contact.phone}`,
-            body: messageText,
-          }),
-        },
-      );
+      await fetch("https://s03-26-equipo-02-web-app-development.onrender.com/twilio/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: `whatsapp:${contact.phone}`,
+          body: messageText,
+        }),
+      });
     } else if (contact?.email) {
-      await fetch(
-        "https://s03-26-equipo-02-web-app-development.onrender.com/brevo/send",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: contact.email,
-            subject: "",
-            htmlContent: `<p>${messageText}</p>`,
-          }),
-        },
-      );
+      await fetch("https://s03-26-equipo-02-web-app-development.onrender.com/brevo/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: contact.email,
+          subject: "Mensaje desde el CRM",
+          htmlContent: `<p>${messageText}</p>`,
+        }),
+      });
     }
 
     const newMessage: ApiMessage = {
@@ -143,7 +136,7 @@ const ChatWindow = ({ contactId, contact }: ChatWindowProps) => {
 
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto px-8 py-6 scroll-smooth bg-[#FAFAFA] custom-scrollbar"
+        className="flex-1 overflow-y-auto px-8 py-6 scroll-smooth bg-[#FAFAFA] custom-scrollbar pb-24"
       >
         <div className="space-y-6 max-w-4xl mx-auto">
           <div className="flex items-center justify-center">
@@ -155,9 +148,7 @@ const ChatWindow = ({ contactId, contact }: ChatWindowProps) => {
           {chatMessages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex ${
-                msg.direction === "sent" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex ${msg.direction === "sent" ? "justify-end" : "justify-start"}`}
             >
               <div
                 className={`flex flex-col ${msg.direction === "sent" ? "items-end" : "items-start"} max-w-[75%]`}
@@ -179,9 +170,7 @@ const ChatWindow = ({ contactId, contact }: ChatWindowProps) => {
 
                   <span
                     className={`block text-[10px] font-bold mt-2.5 ${
-                      msg.direction === "sent"
-                        ? "text-teal-100 text-right"
-                        : "text-[#94A3B8]"
+                      msg.direction === "sent" ? "text-teal-100 text-right" : "text-[#94A3B8]"
                     }`}
                   >
                     {new Date(msg.createdAt).toLocaleTimeString("es-AR", {
